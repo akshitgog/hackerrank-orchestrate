@@ -1,0 +1,1302 @@
+[
+  {
+    "claim_id": "tc_001",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_001",
+      "image_paths": "img_tc_001_1.jpg;img_tc_001_2.jpg",
+      "user_claim": "Customer: My package seal has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_001",
+      "image_paths": "img_tc_001_1.jpg;img_tc_001_2.jpg",
+      "user_claim": "Customer: My package seal has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "seal",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_001_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_002",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_002",
+      "image_paths": "img_tc_002_1.jpg;img_tc_002_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_002",
+      "image_paths": "img_tc_002_1.jpg;img_tc_002_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_002_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_003",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_003",
+      "image_paths": "img_tc_003_1.jpg;img_tc_003_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_003",
+      "image_paths": "img_tc_003_1.jpg;img_tc_003_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "screen",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_003_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_004",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_004",
+      "image_paths": "img_tc_004_1.jpg;img_tc_004_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_004",
+      "image_paths": "img_tc_004_1.jpg;img_tc_004_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_004_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_005",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_005",
+      "image_paths": "img_tc_005_1.jpg;img_tc_005_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_005",
+      "image_paths": "img_tc_005_1.jpg;img_tc_005_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_005_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_006",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_006",
+      "image_paths": "img_tc_006_1.jpg;img_tc_006_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_006",
+      "image_paths": "img_tc_006_1.jpg;img_tc_006_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "screen",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_006_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_007",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_007",
+      "image_paths": "img_tc_007_1.jpg;img_tc_007_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_007",
+      "image_paths": "img_tc_007_1.jpg;img_tc_007_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "screen",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_007_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_008",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_008",
+      "image_paths": "img_tc_008_1.jpg;img_tc_008_2.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_008",
+      "image_paths": "img_tc_008_1.jpg;img_tc_008_2.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "dent",
+      "object_part": "front_bumper",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_008_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_009",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_009",
+      "image_paths": "img_tc_009_1.jpg;img_tc_009_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_009",
+      "image_paths": "img_tc_009_1.jpg;img_tc_009_2.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "screen",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_009_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_010",
+    "category": "Multi-Image Conflict",
+    "claim_input": {
+      "user_id": "synth_user_010",
+      "image_paths": "img_tc_010_1.jpg;img_tc_010_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_010",
+      "image_paths": "img_tc_010_1.jpg;img_tc_010_2.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_010_2",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_011",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_011",
+      "image_paths": "img_tc_011_1.jpg",
+      "user_claim": "Customer: My laptop keyboard has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_011",
+      "image_paths": "img_tc_011_1.jpg",
+      "user_claim": "Customer: My laptop keyboard has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "keyboard",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_011_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_012",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_012",
+      "image_paths": "img_tc_012_1.jpg",
+      "user_claim": "Customer: My laptop keyboard has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_012",
+      "image_paths": "img_tc_012_1.jpg",
+      "user_claim": "Customer: My laptop keyboard has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "keyboard",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_012_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_013",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_013",
+      "image_paths": "img_tc_013_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_013",
+      "image_paths": "img_tc_013_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_013_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_014",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_014",
+      "image_paths": "img_tc_014_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_014",
+      "image_paths": "img_tc_014_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "dent",
+      "object_part": "front_bumper",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_014_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_015",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_015",
+      "image_paths": "img_tc_015_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_015",
+      "image_paths": "img_tc_015_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_015_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_016",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_016",
+      "image_paths": "img_tc_016_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_016",
+      "image_paths": "img_tc_016_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_016_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_017",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_017",
+      "image_paths": "img_tc_017_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_017",
+      "image_paths": "img_tc_017_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "hinge",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_017_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_018",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_018",
+      "image_paths": "img_tc_018_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_018",
+      "image_paths": "img_tc_018_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "hinge",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_018_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_019",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_019",
+      "image_paths": "img_tc_019_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_019",
+      "image_paths": "img_tc_019_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_019_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_020",
+    "category": "False Fraud",
+    "claim_input": {
+      "user_id": "synth_user_020",
+      "image_paths": "img_tc_020_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_020",
+      "image_paths": "img_tc_020_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "dent",
+      "object_part": "front_bumper",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_020_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_021",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_021",
+      "image_paths": "img_tc_021_1.jpg",
+      "user_claim": "Customer: My package seal has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_021",
+      "image_paths": "img_tc_021_1.jpg",
+      "user_claim": "Customer: My package seal has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "torn_packaging",
+      "object_part": "seal",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_021_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_022",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_022",
+      "image_paths": "img_tc_022_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_022",
+      "image_paths": "img_tc_022_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "dent",
+      "object_part": "front_bumper",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_022_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_023",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_023",
+      "image_paths": "img_tc_023_1.jpg",
+      "user_claim": "Customer: My car windshield has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_023",
+      "image_paths": "img_tc_023_1.jpg",
+      "user_claim": "Customer: My car windshield has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "dent",
+      "object_part": "windshield",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_023_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_024",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_024",
+      "image_paths": "img_tc_024_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_024",
+      "image_paths": "img_tc_024_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "dent",
+      "object_part": "rear_bumper",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_024_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_025",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_025",
+      "image_paths": "img_tc_025_1.jpg",
+      "user_claim": "Customer: My car door has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_025",
+      "image_paths": "img_tc_025_1.jpg",
+      "user_claim": "Customer: My car door has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "dent",
+      "object_part": "door",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_025_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_026",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_026",
+      "image_paths": "img_tc_026_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_026",
+      "image_paths": "img_tc_026_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "dent",
+      "object_part": "front_bumper",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_026_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_027",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_027",
+      "image_paths": "img_tc_027_1.jpg",
+      "user_claim": "Customer: My package box has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_027",
+      "image_paths": "img_tc_027_1.jpg",
+      "user_claim": "Customer: My package box has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "torn_packaging",
+      "object_part": "box",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_027_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_028",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_028",
+      "image_paths": "img_tc_028_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_028",
+      "image_paths": "img_tc_028_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "crack",
+      "object_part": "hinge",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_028_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_029",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_029",
+      "image_paths": "img_tc_029_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_029",
+      "image_paths": "img_tc_029_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "dent",
+      "object_part": "rear_bumper",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_029_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_030",
+    "category": "Risk Isolation",
+    "claim_input": {
+      "user_id": "synth_user_030",
+      "image_paths": "img_tc_030_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_030",
+      "image_paths": "img_tc_030_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "user_history_risk;manual_review_required",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "supported",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_030_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_031",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_031",
+      "image_paths": "img_tc_031_1.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_031",
+      "image_paths": "img_tc_031_1.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "screen",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_031_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_032",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_032",
+      "image_paths": "img_tc_032_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_032",
+      "image_paths": "img_tc_032_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_032_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_033",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_033",
+      "image_paths": "img_tc_033_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_033",
+      "image_paths": "img_tc_033_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_033_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_034",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_034",
+      "image_paths": "img_tc_034_1.jpg",
+      "user_claim": "Customer: My car windshield has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_034",
+      "image_paths": "img_tc_034_1.jpg",
+      "user_claim": "Customer: My car windshield has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "dent",
+      "object_part": "windshield",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_034_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_035",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_035",
+      "image_paths": "img_tc_035_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_035",
+      "image_paths": "img_tc_035_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "hinge",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_035_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_036",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_036",
+      "image_paths": "img_tc_036_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_036",
+      "image_paths": "img_tc_036_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "hinge",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_036_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_037",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_037",
+      "image_paths": "img_tc_037_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_037",
+      "image_paths": "img_tc_037_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_037_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_038",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_038",
+      "image_paths": "img_tc_038_1.jpg",
+      "user_claim": "Customer: My car windshield has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_038",
+      "image_paths": "img_tc_038_1.jpg",
+      "user_claim": "Customer: My car windshield has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "dent",
+      "object_part": "windshield",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_038_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_039",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_039",
+      "image_paths": "img_tc_039_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_039",
+      "image_paths": "img_tc_039_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "dent",
+      "object_part": "rear_bumper",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_039_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_040",
+    "category": "Wrong Component",
+    "claim_input": {
+      "user_id": "synth_user_040",
+      "image_paths": "img_tc_040_1.jpg",
+      "user_claim": "Customer: My laptop keyboard has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_040",
+      "image_paths": "img_tc_040_1.jpg",
+      "user_claim": "Customer: My laptop keyboard has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "true",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "none",
+      "issue_type": "crack",
+      "object_part": "keyboard",
+      "claim_status": "contradicted",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "img_tc_040_1",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_041",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_041",
+      "image_paths": "img_tc_041_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_041",
+      "image_paths": "img_tc_041_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_042",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_042",
+      "image_paths": "img_tc_042_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_042",
+      "image_paths": "img_tc_042_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "dent",
+      "object_part": "front_bumper",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_043",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_043",
+      "image_paths": "img_tc_043_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_043",
+      "image_paths": "img_tc_043_1.jpg",
+      "user_claim": "Customer: My package label has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "torn_packaging",
+      "object_part": "label",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_044",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_044",
+      "image_paths": "img_tc_044_1.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_044",
+      "image_paths": "img_tc_044_1.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "crack",
+      "object_part": "screen",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_045",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_045",
+      "image_paths": "img_tc_045_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_045",
+      "image_paths": "img_tc_045_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "crack",
+      "object_part": "hinge",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_046",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_046",
+      "image_paths": "img_tc_046_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_046",
+      "image_paths": "img_tc_046_1.jpg",
+      "user_claim": "Customer: My car front_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "dent",
+      "object_part": "front_bumper",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_047",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_047",
+      "image_paths": "img_tc_047_1.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_047",
+      "image_paths": "img_tc_047_1.jpg",
+      "user_claim": "Customer: My laptop screen has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "crack",
+      "object_part": "screen",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_048",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_048",
+      "image_paths": "img_tc_048_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop"
+    },
+    "expected_output": {
+      "user_id": "synth_user_048",
+      "image_paths": "img_tc_048_1.jpg",
+      "user_claim": "Customer: My laptop hinge has a crack.",
+      "claim_object": "laptop",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "crack",
+      "object_part": "hinge",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_049",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_049",
+      "image_paths": "img_tc_049_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car"
+    },
+    "expected_output": {
+      "user_id": "synth_user_049",
+      "image_paths": "img_tc_049_1.jpg",
+      "user_claim": "Customer: My car rear_bumper has a dent.",
+      "claim_object": "car",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "dent",
+      "object_part": "rear_bumper",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  },
+  {
+    "claim_id": "tc_050",
+    "category": "Extreme Crop",
+    "claim_input": {
+      "user_id": "synth_user_050",
+      "image_paths": "img_tc_050_1.jpg",
+      "user_claim": "Customer: My package seal has a torn_packaging.",
+      "claim_object": "package"
+    },
+    "expected_output": {
+      "user_id": "synth_user_050",
+      "image_paths": "img_tc_050_1.jpg",
+      "user_claim": "Customer: My package seal has a torn_packaging.",
+      "claim_object": "package",
+      "evidence_standard_met": "false",
+      "evidence_standard_met_reason": "Mocked reason.",
+      "risk_flags": "cropped_or_obstructed",
+      "issue_type": "torn_packaging",
+      "object_part": "seal",
+      "claim_status": "not_enough_information",
+      "claim_status_justification": "Mocked justification.",
+      "supporting_image_ids": "none",
+      "valid_image": "true",
+      "severity": "medium"
+    }
+  }
+]

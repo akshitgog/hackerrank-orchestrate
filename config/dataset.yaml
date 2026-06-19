@@ -1,0 +1,22 @@
+production:
+  base_dir: "dataset"
+  images_dir: "dataset/images"
+  claims_file: "dataset/claims.csv"
+  user_history_file: "dataset/user_history.csv"
+  evidence_requirements_file: "dataset/evidence_requirements.csv"
+  output_file: "output.csv"
+
+test:
+  base_dir: "dataset"
+  images_dir: "dataset/images/sample"
+  claims_file: "dataset/test_claim.csv"
+  user_history_file: "dataset/user_history.csv"
+  evidence_requirements_file: "dataset/evidence_requirements.csv"
+  output_file: "code/evaluation/test_output.csv"
+
+mock:
+  base_dir: "code/testing/synthetic"
+  users_file: "code/testing/synthetic/mock_users.json"
+  claims_file: "code/testing/synthetic/mock_claims.json"
+  vlm_data_file: "code/testing/synthetic/mock_vlm_data.json"
+  

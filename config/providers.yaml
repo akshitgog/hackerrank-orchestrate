@@ -1,0 +1,23 @@
+vlm:
+  # High Engine: Elite vision precision
+  # To change provider, simply change the prefix (e.g., 'openai/gpt-4o' or 'gemini/gemini-1.5-pro')
+  model: bedrock/arn:aws:bedrock:us-east-1:557904961273:inference-profile/us.anthropic.claude-sonnet-4-6
+  concurrency: 2
+  sleep_seconds: 0
+  max_retries: 1
+
+generator:
+  # Mid Engine: Strict instruction following for 2-sentence output
+  # To change provider, simply change the prefix (e.g., 'anthropic/claude-3-5-sonnet-20240620')
+  model: bedrock/us.meta.llama3-3-70b-instruct-v1:0
+  concurrency: 5
+  sleep_seconds: 0
+  max_retries: 1
+
+extractor:
+  # Low Engine: Ultra-fast baseline text extraction
+  # To change provider, simply change the prefix (e.g., 'openai/gpt-4o-mini')
+  model: bedrock/amazon.nova-micro-v1:0
+  concurrency: 5
+  sleep_seconds: 0
+  max_retries: 1
