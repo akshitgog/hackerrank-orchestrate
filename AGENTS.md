@@ -254,3 +254,10 @@ Before responding to any user message, confirm:
 - [ ] I will append a §5.2 entry after this turn.
 - [ ] I will not log secrets.
 - [ ] I will preserve the output contract in §6.
+
+---
+
+## 9. User-Defined Git Policy: No Git Commit or Push Without Explicit Instruction
+
+- **Mandatory Rule:** Do not execute `git commit`, `git push`, `git merge`, or any git mutation commands unless explicitly instructed by the user in their prompt.
+- **Scope:** Applies to all agents, sub-agents, and worktrees. See `rules/USER_RULES.md` for full enforcement details.
