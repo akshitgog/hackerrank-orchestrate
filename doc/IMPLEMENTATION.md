@@ -1,6 +1,6 @@
 # IMPLEMENTATION.md — Codebase Architecture & Hackathon Execution Roadmap
 
-This document defines the production implementation roadmap for the HackerRank Orchestrate Message Notification Router, adhering to the Principal Engineering standards in [`june_edition_learning.md`](file:///C:/Users/Galactus/OneDrive/Desktop/orches/planning/june_edition_learning.md) and incorporating the winning Rank 3 architectural principles (Universal Safe-Default Row, Layer-by-Layer Verification, Deterministic Invariant Ownership).
+This document defines the production implementation roadmap for the HackerRank Orchestrate Message Notification Router, adhering to the Principal Engineering standards in [`june_edition_learning.md`](file:///C:/Users/Galactus/OneDrive/Desktop/orches/doc/june_edition_learning.md) and incorporating the winning Rank 3 architectural principles (Universal Safe-Default Row, Layer-by-Layer Verification, Deterministic Invariant Ownership).
 
 ---
 
@@ -10,7 +10,7 @@ Our repository is organized into four modular layers, separating **probabilistic
 
 ```text
 dataset/                        # The 11 CSV dataset files + media/
-docs/                           # Challenge documentation & architecture specs
+doc/                            # Challenge documentation & architecture specs
 code/
 ├── config/                     # Declarative configuration & Pydantic v2 validation
 │   ├── config.yaml             # Externalized model names, thresholds, paths (12-Factor App)
