@@ -1,0 +1,49 @@
+# STT Audio Post-Processing — Configuration
+# This file defines transcription normalization rules for Hindi-English code-switched voice notes.
+# Edit this file to add/remove normalization patterns — zero code modifications needed.
+
+normalization_rules:
+  # Common STT artifacts in Hindi-English code-switching
+  replacements:
+    "umm": ""
+    "uhh": ""
+    "aah": ""
+    "hmm": ""
+    " .  ": ". "
+    "  ": " "
+
+  # Hindi romanization normalization (common Whisper mistakes)
+  hindi_fixes:
+    "bhai": "bhai"       # Keep as-is (common address)
+    "yaar": "yaar"       # Keep as-is (informal address)
+    "acha": "acha"       # Keep as-is
+    "theek hai": "theek hai"
+    "kya": "kya"
+    "karo": "karo"
+    "bhej do": "bhej do"
+    "jaldi": "jaldi"     # Important: means "quickly/urgently"
+    "abhi": "abhi"       # Important: means "right now"
+
+  # Urgency keywords to preserve (never strip these)
+  preserve_keywords:
+    - "urgent"
+    - "emergency"
+    - "jaldi"
+    - "abhi"
+    - "turant"
+    - "call me"
+    - "call karo"
+    - "server down"
+    - "otp"
+    - "password"
+    - "pin"
+
+context_instruction: |
+  This is a transcription of a WhatsApp voice note from India.
+  The speaker may code-switch between Hindi, English, and Hinglish (mixed).
+  Preserve the original language as spoken. Do not translate Hindi to English.
+  Focus on capturing the semantic meaning accurately, especially:
+  - Any urgency or time pressure ("jaldi", "abhi", "right now", "ASAP")
+  - Any requests for action ("call me", "reply karo", "come online")
+  - Any sensitive requests ("OTP bhejo", "password share karo")
+  - Any names, numbers, or specific instructions

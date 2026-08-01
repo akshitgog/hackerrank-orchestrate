@@ -1,0 +1,28 @@
+models:
+  llm_model: "gemini/gemini-2.5-flash"    # LiteLLM format, swappable
+  vlm_model: "gemini/gemini-2.5-flash"    # Multimodal VLM
+  stt_model: "openai/whisper-1"           # STT for voice notes
+
+execution:
+  max_retries: 3
+  max_concurrency: 10
+  timeout_seconds: 30
+
+media:
+  image_long_edge_px: 2576
+  enable_zoom_inspection: true
+
+paths:
+  dataset_dir: "dataset"
+  output_file: "dataset/output.csv"
+  cache_dir: ".cache"
+
+confidence:
+  gate_scam: 0.95
+  gate_promo_optout: 0.95
+  gate_emergency: 0.95
+  gate_actionable: 0.90
+  gate_dnd_digest: 0.85
+  default: 0.70
+  media_failure_penalty: 0.15
+  fallback_default: 0.50

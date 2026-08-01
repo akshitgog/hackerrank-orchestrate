@@ -1,0 +1,148 @@
+"""
+settings.py — Pydantic v2 Fail-Fast Boot Configuration.
+
+Applies the 12-Factor App methodology (Factor III):
+  - All config externalized to YAML + ENV
+  - Load YAML via Pydantic v2 `model_validate()`
+  - Fail-Fast: missing/invalid config terminates at startup with clear error
+  - .env file loaded via python-dotenv before any config parsing
+
+Zero hardcoded model names, thresholds, or credentials in Python source.
+"""
+
+import os
+import sys
+import yaml
+from pathlib import Path
+from pydantic import BaseModel, ValidationError
+
+# Load .env file at import time (Fail-Fast: before any config parsing)
+try:
+    from dotenv import load_dotenv
+    # Search for .env in code/env/.env (settings.py -> config/ -> code/env/.env)
+    _CODE_DIR = Path(__file__).resolve().parent.parent
+    _env_path = _CODE_DIR / "env" / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path, override=False)
+except ImportError:
+    # python-dotenv not installed — fall back to system ENV only
+    pass
+
+
+class ModelConfig(BaseModel):
+    """LiteLLM model identifiers (format: provider/model-name)."""
+    llm_model: str
+    vlm_model: str
+    stt_model: str
+
+
+class ExecutionConfig(BaseModel):
+    """Pipeline execution parameters."""
+    max_retries: int
+    max_concurrency: int
+    timeout_seconds: int
+
+
+class MediaConfig(BaseModel):
+    """Image/audio preprocessing parameters."""
+    image_long_edge_px: int
+    enable_zoom_inspection: bool
+
+
+class PathConfig(BaseModel):
+    """File system paths (relative to project root)."""
+    dataset_dir: str
+    output_file: str
+    cache_dir: str
+
+
+class ConfidenceConfig(BaseModel):
+    """Deterministic confidence thresholds per gate."""
+    gate_scam: float
+    gate_promo_optout: float
+    gate_emergency: float
+    gate_actionable: float
+    gate_dnd_digest: float
+    default: float
+    media_failure_penalty: float
+    fallback_default: float
+
+
+class AppConfig(BaseModel):
+    """Top-level application configuration."""
+    models: ModelConfig
+    execution: ExecutionConfig
+    media: MediaConfig
+    paths: PathConfig
+    confidence: ConfidenceConfig
+
+
+def load_config(path: str) -> AppConfig:
+    """
+    Load configuration from YAML file with ENV overrides.
+
+    1. Reads YAML via yaml.safe_load()
+    2. Applies ENV overrides (ORCHESTRATE_LLM_MODEL, ORCHESTRATE_VLM_MODEL, etc.)
+    3. Validates via Pydantic v2 model_validate()
+    4. Fail-Fast: terminates with sys.exit(1) if config is missing or invalid
+
+    Args:
+        path: Absolute or relative path to config.yaml
+
+    Returns:
+        Validated AppConfig instance
+    """
+    if not os.path.exists(path):
+        print(f"CRITICAL ERROR: Configuration file not found at {path}", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            raw_config = yaml.safe_load(f)
+    except Exception as e:
+        print(f"CRITICAL ERROR: Failed to parse YAML config: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # ── Apply ENV overrides (12-Factor App) ──
+    if raw_config is None:
+        raw_config = {}
+
+    if "models" not in raw_config:
+        raw_config["models"] = {}
+
+    env_overrides = {
+        "ORCHESTRATE_LLM_MODEL": ("models", "llm_model"),
+        "ORCHESTRATE_VLM_MODEL": ("models", "vlm_model"),
+        "ORCHESTRATE_STT_MODEL": ("models", "stt_model"),
+    }
+    for env_key, (section, field) in env_overrides.items():
+        value = os.environ.get(env_key)
+        if value:
+            if section not in raw_config:
+                raw_config[section] = {}
+            raw_config[section][field] = value
+
+    # ── Validate via Pydantic v2 (Parse, Don't Validate) ──
+    try:
+        config = AppConfig.model_validate(raw_config)
+    except ValidationError as e:
+        print(f"CRITICAL ERROR: Configuration validation failed:\n{e}", file=sys.stderr)
+        sys.exit(1)
+
+    # ── Fail-Fast: Verify API key exists for the chosen provider ──
+    provider = config.models.llm_model.split("/")[0] if "/" in config.models.llm_model else ""
+    provider_env_map = {
+        "gemini": "GEMINI_API_KEY",
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+    }
+    expected_env = provider_env_map.get(provider)
+    if expected_env and not os.environ.get(expected_env):
+        print(
+            f"WARNING: {expected_env} not set in environment. "
+            f"LLM calls to {config.models.llm_model} will fail. "
+            f"Set it in .env or export it.",
+            file=sys.stderr,
+        )
+
+    return config

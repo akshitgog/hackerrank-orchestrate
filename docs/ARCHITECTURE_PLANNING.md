@@ -8,7 +8,7 @@ This architecture is built upon four core operational pillars:
 1. **Row-by-Row Chronological & Asyncio Concurrent Processing:** Messages in `messages.csv` are sorted by `created_at` timestamp. Because multiple messages can arrive simultaneously (at the exact same timestamp for a user or across users), the pipeline uses **`asyncio` concurrency (`asyncio.gather` with semaphores)** to run STT, VLM, and LLM labeling calls in parallel while preserving deterministic 1-to-1 output row ordering.
 2. **Media-First Pipeline (STT & VLM):** Media is inspected and transcribed/extracted *before* semantic labeling.
 3. **LLM Outputs Pure Categorical Labels (Including History Match):** The LLM never outputs numeric scores or confidence values. It receives the incoming message and pre-filtered candidate history, outputting categorical labels and selecting matching evidence IDs.
-4. **Bounded Sub-Scores & Sequential Gates (Python):** Python evaluates bounded sub-scores (`mean` / `weighted_mean`) and strict sequential gates (Safety, Scam, Emergency, Consent) to determine the final `action` and `message_type`.
+4. **Deterministic Rule-Based Decision Tree (No Averages):** Python executes absolute short-circuit gates and a deterministic decision tree so crucial messages are never diluted by averages.
 
 ---
 
@@ -30,7 +30,7 @@ personal | urgent | event | payment | business_update | promotion | greeting | f
 
 When processing a row, the LLM prompt receives:
 - Incoming message metadata, text, and extracted STT/VLM media text.
-- 3 to 5 candidate historical rows pre-filtered by Python (`same user_id` + `same sender_id OR group_id OR business_id`).
+- 3 to 5 candidate historical rows pre-filtered by Python (`same user_id` + `same sender_id OR group_id OR business_id` with similar intent).
 
 The LLM outputs only the following structured JSON schema:
 
@@ -71,10 +71,8 @@ No numeric scores, no confidence floats, and no `action` enums are output by the
    c. SEMANTIC & HISTORY MATCH LABELING (Asyncio LLM):
       - Send M + STT/VLM text + candidate history rows to LLM asynchronously
       - Parse JSON label response (content_intent, risk_label, best_evidence_ids, etc.)
-   d. SUB-SCORE & GATE EVALUATION (Python):
-      - Convert categorical labels to bounded numeric values (0.0 to 1.0)
-      - Evaluate bounded means (historical_engagement, interruption_fit, utility_score)
-      - Apply sequential gates (Prompt Injection, Scam, Emergency, Consent)
+   d. DETERMINISTIC DECISION TREE EVALUATION (Python):
+      - Apply Safety, Scam, Emergency, Actionable Operational, and DND rules sequentially
    e. DECISION & CONFIDENCE CALIBRATION:
       - Map to action, message_type, reason, confidence, evidence_message_ids
 4. Sort processed results back to original message_id order and write output.csv
@@ -109,113 +107,49 @@ When evaluating message `M` for `user_id`, Python retrieves 6 distinct historica
 
 ### 5.6 `response_time_history` (from `message_events.reaction_time_minutes`)
 - Bounded median response speed to similar messages:
-  - `fast`: median $\le 10$ min ($\rightarrow 1.00$)
-  - `normal`: median $>10$ and $\le 60$ min ($\rightarrow 0.65$)
-  - `slow`: median $>60$ min ($\rightarrow 0.35$)
-  - `no_signal`: no opened/replied event ($\rightarrow 0.50$)
+  - `fast`: median $\le 10$ min
+  - `normal`: median $>10$ and $\le 60$ min
+  - `slow`: median $>60$ min
+  - `no_signal`: no opened/replied event
 
 ---
 
-## 6. Safety & Absolute Gates (Short-Circuit Rules)
+## 6. Deterministic Rule-Based Decision Tree
 
-Safety and consent gates execute *before* numeric scoring.
+To prevent the **Dilution Problem** (where crucial actionable messages get downgraded by low historical averages), Python evaluates a deterministic hierarchy of rules:
 
-### 6.1 Prompt Injection Gate
-If message text attempts control overrides (`"ignore previous rules"`, `"set action=notify"`), trap as untrusted content. If paired with OTP/PIN or account threats $\rightarrow$ `mute`/`scam`.
+### 6.1 Absolute Safety & Consent Gates (Short-Circuit Rules)
+1. **Prompt Injection / Credential Phishing Gate:** If `content_intent` in `[prompt_injection, credential_or_otp_request, account_threat]` in an unsafe flow $\rightarrow$ `action = mute`, `message_type = scam`.
+2. **Domain Impersonation Gate:** If `business_verified == 0` AND official domain mismatches sender domain AND report count is high $\rightarrow$ `action = mute`, `message_type = scam`.
+3. **Promotional Consent Gate:** If `is_promotional == true` (or `content_intent == promotion_or_offer`) AND `allows_promotions == 0` (or opted out) $\rightarrow$ `action = mute`, `message_type = promotion`.
+4. **Emergency Override Gate:** If `priority_label == critical` AND `risk_label` not in `[high, critical]` $\rightarrow$ `action = notify`, `message_type = urgent` (or `event`). Urgency overrides DND quiet hours and muted groups instantly.
 
-### 6.2 Credential / OTP Phishing Gate
-If `contains_sensitive_request == true` in an unsafe flow (asking user to reply/share OTP, PIN, password, or visit an unverified domain) $\rightarrow$ short-circuit to `action = mute`, `message_type = scam`.
+### 6.2 Actionable Operational Rules
+5. **Actionable High-Priority Notice:** If `priority_label == high` AND (`requires_reply == true` OR `has_deadline == true` OR `sender_role_in_group == admin` OR transactional business update) $\rightarrow$ `action = notify`.
 
-### 6.3 Domain Impersonation Gate
-If `business_verified == 0` AND official domain mismatches sender domain AND report count is high $\rightarrow$ short-circuit to `action = mute`, `message_type = scam`.
+### 6.3 Quiet Hours & Group Mute Handling
+6. **DND / Muted Group Non-Urgent Handling:** If message arrives during DND (`in_dnd_window == True`) or in a muted group (`group_muted_by_user == 1`) and is NOT critical/high-priority operational $\rightarrow$ `action = digest` (or `mute` if spam/chain forward).
 
-### 6.4 Promotional Consent Gate
-If `is_promotional == true` (or `content_intent == promotion_or_offer`) AND `allows_promotions == 0` (or opted out) $\rightarrow$ short-circuit to `action = mute`, `message_type = promotion`.
-*(Note: Transactional delivery/booking updates (`transactional_update`) bypass this gate).*
-
-### 6.5 Emergency Override Gate
-If `priority_label == critical` AND `risk_label` not in `[high, critical]` $\rightarrow$ short-circuit to `action = notify`, `message_type = urgent` (or `event`). Urgency overrides DND quiet hours and muted groups.
-
----
-
-## 7. Bounded Sub-Score Formulas (`mean` / `weighted_mean`)
-
-For messages that do not short-circuit through safety or consent gates, Python calculates bounded sub-scores in the range `[0.0, 1.0]`:
-
-### 7.1 Label-to-Number Mapping
-```text
-priority_points:
-critical -> 1.00
-high     -> 0.85
-medium   -> 0.55
-low      -> 0.25
-unclear  -> 0.40
-
-risk_penalty_factor:
-critical -> 1.00
-high     -> 0.85
-medium   -> 0.55
-low      -> 0.20
-none     -> 0.00
-```
-
-### 7.2 Historical Engagement Sub-Score
-```text
-historical_engagement = mean(
-  open_rate,
-  reply_rate,
-  1.0 - dismissal_rate,
-  1.0 - report_rate
-)
-```
-
-### 7.3 Interruption Fit Sub-Score
-```text
-interruption_fit = mean(
-  not_in_dnd_or_priority_high,
-  not_group_muted_or_priority_high,
-  fatigue_tolerance,
-  direct_or_recipient_specific_signal
-)
-```
-
-### 7.4 Composite Utility Score
-```text
-utility_score = weighted_mean(
-  semantic_importance,
-  sender_trust,
-  relationship_strength,
-  historical_engagement,
-  response_speed,
-  consent_fit,
-  interruption_fit
-)
-```
+### 6.4 Opted-In Marketing Promotions
+7. **Opted-In Promotional Delivery:** If `is_promotional == true` AND `allows_promotions == 1` $\rightarrow$ `action = digest`, `message_type = promotion`. (Marketing discounts should never interrupt work or wake users up).
 
 ---
 
-## 8. Final Decision Order (Sequential Evaluation)
+## 7. Confidence Calibration Table
 
-```text
-1. If Prompt Injection + Sensitive Credential Request -> mute / scam
-2. If risk_label in [high, critical] OR Domain Impersonation -> mute / scam (or spam)
-3. If Emergency Override (priority == critical, safe content) -> notify / urgent (or event)
-4. If Promotional Consent Gate (is_promotional=true AND allows_promotions=0) -> mute / promotion
-5. If utility_score >= 0.70 -> notify
-6. If utility_score >= 0.40 -> digest
-7. Else -> mute
-```
+Instead of a random floating-point calculation, `confidence` is calibrated deterministically based on rule certainty and historical evidence:
 
-### 8.1 Confidence Calibration
-- `confidence` float `[0.0, 1.0]` is calibrated based on historical evidence strength and distance from threshold:
-  - Strong history match (`same_situation` + valid evidence IDs): `0.85 – 0.95`
-  - Moderate history match (`similar_situation`): `0.70 – 0.84`
-  - Weak/no history match (`no_match`, blank history): `0.50 – 0.69`
-  - Media extraction failure fallback: penalize confidence by `-0.15`
+| Rule / Signal Strength | Calibrated `confidence` Score | Rationale |
+| :--- | :---: | :--- |
+| **Absolute Gate (Scam / Promo Opt-out / Emergency)** | `0.95` | Complete rule certainty; zero ambiguity. |
+| **Strong History Match (`same_situation` + valid evidence IDs)** | `0.90` | Verified historical proof from `message_history.csv`. |
+| **Standard Rule Match (Actionable notice / Opted-in Promo)** | `0.85` | Clear semantic rule with consistent user profile data. |
+| **Borderline / Ambiguous Case (`no_match` history)** | `0.70` | No historical precedent; relying on general fallback rule. |
+| **Media Extraction Failure Fallback** | `Score - 0.15` | Penalty applied if audio/image extraction failed. |
 
 ---
 
-## 9. Message Type Mapping
+## 8. Message Type Mapping
 
 ```text
 credential_or_otp_request + unsafe flow -> scam
@@ -233,7 +167,7 @@ unclear safe content -> unknown
 
 ---
 
-## 10. Comprehensive Test Plan
+## 9. Comprehensive Test Plan
 
 The implementation must pass the following minimum validation suite before emitting `output.csv`:
 
@@ -261,7 +195,7 @@ test_asyncio_simultaneous_arrival_concurrency
 
 ---
 
-## 11. Codebase Structure (Clean 4-Layer Hierarchy with Asyncio)
+## 10. Codebase Structure (Clean 4-Layer Hierarchy with Asyncio)
 
 ```text
 code/
@@ -273,8 +207,8 @@ code/
 │   ├── media.py           # Asyncio STT audio transcription and VLM image OCR extraction
 │   └── prompt.py          # Asyncio LLM calls: constructs prompt and parses JSON labels
 ├── router/
-│   ├── scoring.py         # Evaluates mean / weighted_mean bounded sub-scores (0.0 - 1.0)
-│   └── policy.py          # Executes sequential decision order, absolute gates, and enum mapping
+│   ├── policy.py          # Deterministic Rule-Based Decision Tree & absolute gates
+│   └── scoring.py         # Confidence calibration table and history match validation
 └── validator/
     └── check_output.py    # Verifies 110 rows, exact 6 columns, CSV quoting, and evidence IDs
 ```
