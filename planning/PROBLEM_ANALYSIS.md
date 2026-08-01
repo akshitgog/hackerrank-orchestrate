@@ -99,7 +99,7 @@ The spec says `output.csv` will be compared against hidden ground-truth labels. 
 
 ---
 
-## 7. Constraints
+## 7. Constraints & Runtime Execution
 
 From spec and README:
 - Must be runnable from the terminal
@@ -107,6 +107,7 @@ From spec and README:
 - Must produce a valid `output.csv`
 - Must not use organizer-only files or hardcoded labels
 - Secrets must come from environment variables, never hardcoded
+- **Simultaneous Arrival & Concurrency:** Multiple messages can arrive at the exact same timestamp (`created_at`) for a user or across users. The pipeline must support **concurrency via `asyncio`** to process independent messages and media extractions safely in parallel without race conditions or non-deterministic output sorting.
 
 ---
 
@@ -133,3 +134,17 @@ From spec and README:
 > *"The final decision should balance usefulness, urgency, repetition, and risk."*
 
 > *"Use [sample_messages.csv] only to understand the expected output format and style."*
+
+---
+
+## 10. Core Operational Principles (Sample Data Role & No Over-Engineering)
+
+1. **Sample Data is for Format & Style Only (Not Absolute Truth):**
+   - As explicitly quoted from the spec above, `sample_messages.csv` (30 rows) is provided **exclusively** to demonstrate expected CSV output formatting, column ordering, and style.
+   - Do **not** treat sample rows as absolute classification laws or assume that missing enum values (such as `payment`, which is absent from samples but present in the spec's allowed vocabulary) do not exist.
+   - All 11 `message_type` values must be supported by the classifier.
+
+2. **No Over-Engineering (Classification Engine vs. Live Messaging Backend):**
+   - This challenge requires building a **Message Notification Router**—a classifier that evaluates the 110 fixed incoming messages in `messages.csv` against the recipient's historical context.
+   - Do **not** over-engineer by simulating a real-time messaging app backend, modeling hypothetical future two-way replies between arbitrary users, or creating dynamic graph simulations outside the evaluation scope.
+   - Keep the architecture strictly focused on accurately predicting `action`, `message_type`, `reason`, `confidence`, and `evidence_message_ids` for each evaluation message while supporting clean asyncio concurrency.

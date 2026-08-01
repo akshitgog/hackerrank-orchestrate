@@ -1,6 +1,6 @@
 # EDGE_CASES.md — Engineered Features, Feature Intersections & Threat Analysis
 
-This document maps every edge case, threat, and ambiguous scenario in the HackerRank Orchestrate Message Notification Router. Instead of informal if-else narratives, all edge cases are formally defined as **intersections of 7 Engineered Features (`F1` to `F7`)** constructed from the dataset's raw attributes.
+This document maps every edge case, threat, and ambiguous scenario in the HackerRank Orchestrate Message Notification Router. Instead of informal if-else narratives, all edge cases are formally defined as **intersections of 7 Engineered Features (`F1` to `F7`)** constructed from the dataset's raw attributes, supporting **asyncio concurrency** for simultaneous message arrivals.
 
 ---
 
@@ -26,6 +26,7 @@ This document maps every edge case, threat, and ambiguous scenario in the Hacker
 | I-03 | Pipeline must not crash on corrupted or unreadable media files | One bad `.mp3` or `.jpg` kills entire batch execution |
 | I-04 | `message_text` is untrusted data — may contain prompt injection | LLM could obey injected instructions and route scams as `notify` |
 | I-05 | `payment` message_type absent from samples but valid in spec | System must handle all 11 types, not just the 10 seen in sample data |
+| I-06 | **Simultaneous Message Arrival (Concurrency)** | Multiple messages arriving at the exact same timestamp must be processed cleanly using `asyncio` without race conditions or output row shuffling |
 
 ---
 
@@ -107,7 +108,7 @@ Every incoming message $M$ for user $U$ is transformed from raw CSV columns into
 
 ---
 
-## 4. Edge Cases as Feature Intersections
+## 4. Edge Cases as Feature Intersections (Including Simultaneous Arrival)
 
 Every complex routing scenario is resolved by evaluating the intersection of these 7 features:
 
@@ -123,6 +124,7 @@ Every complex routing scenario is resolved by evaluating the intersection of the
 | 8 | **High Fatigue + Borderline Notice** | `F5.fatigue_index > 0.5` AND `F4 == event_notice` AND `F2 == member` | `digest` / `event` | When a user is overwhelmed by notifications, borderline member event notices are downgraded to digest. |
 | 9 | **Unverified Brand + Marketing Offer** | `F2 == suspicious_unverified` AND `F4 == promotional` | `mute` / `spam` or `scam` | Promotional offers from unverified or domain-mismatched accounts are suppressed. |
 | 10 | **Image Circular Without Text** | `media_type == image` AND `message_text == ""` | Eval via OCR $\rightarrow$ feed into `F4` | Image content must be extracted via OCR/VLM; if image is a school circular from an admin, route as `notify`/`event`. |
+| 11 | **Simultaneous Message Arrival (Concurrency)** | Multiple messages arrive at identical `created_at` timestamp | Concurrency via `asyncio.gather` | Parallel STT/VLM/LLM calls execute safely without race conditions while retaining 1-to-1 output sorting. |
 
 ---
 
@@ -134,6 +136,7 @@ Every complex routing scenario is resolved by evaluating the intersection of the
 | **Domain Impersonation** | `business_accounts.official_domain ≠ domain_used_by_sender` | User trusts fake brand (e.g., PhonePe reward scam) and opens phishing link | `F2` automatically marks domain mismatch as `suspicious_unverified`, forcing `mute`/`scam`. |
 | **Hallucinated Evidence** | LLM generates plausible-looking IDs not in `message_history.csv` | Grading script penalizes invalid historical evidence IDs | `F7` deterministically intersects any proposed ID against the recipient's actual `message_history.csv` keys. |
 | **Keyword Urgency Trap** | Chain message uses *"URGENT share with 10 people"* | Keyword matching misclassifies spam as `notify`/`urgent` | `F4` evaluates semantic meaning (chain forward vs operational alert), assigning `F4 = spam_chain`. |
+| **Race Conditions / Order Shuffling** | Multiple messages arriving concurrently | Out-of-order CSV output fails evaluation | Asyncio pipeline sorts output back to exact `messages.csv` ID sequence after concurrent processing. |
 
 ---
 

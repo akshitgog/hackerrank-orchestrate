@@ -102,21 +102,147 @@ erDiagram
 
 ---
 
-## 4. Runtime Join Sequence
+## 4. Runtime Join Sequence (Asyncio & Concurrency Ready)
 
-For each message M in `messages.csv`:
+For each message M in `messages.csv` (processed concurrently via `asyncio` to handle simultaneous message arrivals):
 
 1. **User profile** → `users.csv` by `M.user_id` (get DND, engagement stats)
 2. **Context** (by `conversation_type`):
    - Group → `groups.csv` by `M.group_id` + `group_members.csv` for sender role and recipient mute state
    - Business → `business_accounts.csv` by `M.business_id` + `user_business_history.csv` for relationship and consent
    - Personal → `users.csv` by `M.sender_user_id`
-3. **Media** → if `media_type=image`, get path from `images.csv`; if `voice`, from `voice_notes.csv`
+3. **Media** → if `media_type=image`, get path from `images.csv` (async VLM OCR); if `voice`, from `voice_notes.csv` (async STT)
 4. **History** → `message_history.csv` filtered by same user/sender/business + `message_events.csv` for past reactions
 
 ---
 
-## 5. Key Decision Signals
+## 5. Lossless User Profile JSON Schema (Runtime Data Model)
+
+To evaluate incoming messages efficiently without repeated CSV lookups, the router unifies all 13 dataset files into a single **Lossless User Profile** per recipient (`u_001` to `u_040`). Every attribute, count, and timestamp from all dataset tables is preserved verbatim:
+
+```json
+{
+  "user_id": "u_001",
+  
+  "profile": {
+    "do_not_disturb_window": "22:00-07:00",
+    "messages_opened_30d": 45,
+    "messages_replied_30d": 12,
+    "notifications_dismissed_30d": 8,
+    "messages_reported_30d": 0
+  },
+
+  "groups": {
+    "group_001": {
+      "group_id": "group_001",
+      "group_name": "Tower B Residents",
+      "group_type": "society",
+      "member_count": 42,
+      "admin_count": 3,
+      "created_at": "2025-11-12 10:00",
+      "messages_30d": 310,
+      "user_membership": {
+        "role": "member",
+        "joined_at": "2025-11-15 14:22",
+        "messages_sent_30d": 5,
+        "messages_read_30d": 280,
+        "replies_sent_30d": 3,
+        "notifications_dismissed_30d": 4,
+        "group_muted_by_user": 0
+      }
+    }
+  },
+
+  "businesses": {
+    "business_001": {
+      "business_id": "business_001",
+      "display_name": "Zepto Quick Delivery",
+      "brand_name": "Zepto",
+      "category": "quick_commerce",
+      "verified": 1,
+      "official_domain": "zeptonow.com",
+      "domain_used_by_sender": "zeptonow.com",
+      "account_age_days": 850,
+      "messages_sent_30d": 12000,
+      "user_reports_30d": 2,
+      "domain_used_by_sender_age_days": 850,
+      "user_relationship": {
+        "why_user_knows_account": "recent_grocery_delivery",
+        "last_activity_at": "2026-07-28 19:45",
+        "allows_promotions": 1,
+        "promotions_opted_out_at": null,
+        "activity_count_180d": 24,
+        "messages_opened_30d": 8,
+        "messages_dismissed_30d": 1,
+        "messages_replied_30d": 0,
+        "last_reply_at": null
+      }
+    }
+  },
+
+  "known_senders": {
+    "u_043": {
+      "sender_user_id": "u_043",
+      "messages_received": 3,
+      "messages_opened": 3,
+      "messages_replied": 1,
+      "notifications_dismissed": 0,
+      "muted_after_message": 0,
+      "messages_reported": 0,
+      "message_ids": ["hist_0001", "hist_0014", "hist_0029"],
+      "shared_groups": [
+        {
+          "group_id": "group_001",
+          "group_name": "Tower B Residents",
+          "group_type": "society",
+          "sender_role_in_group": "admin"
+        }
+      ]
+    }
+  },
+
+  "message_history": [
+    {
+      "message_id": "hist_0001",
+      "conversation_type": "group",
+      "group_id": "group_001",
+      "business_id": null,
+      "sender_user_id": "u_043",
+      "created_at": "2026-07-15 08:30",
+      "message_text": "Water supply maintenance scheduled for tomorrow morning.",
+      "media_type": null,
+      "media_id": null,
+      "media_file_path": null,
+      "forwarded_count": 0,
+      "user_event": {
+        "message_opened": 1,
+        "message_replied": 0,
+        "reaction_time_minutes": 14,
+        "notification_dismissed": 0,
+        "muted_after_message": 0,
+        "message_reported": 0
+      }
+    }
+  ],
+
+  "daily_notification_summary": [
+    {
+      "date": "2026-07-01",
+      "notifications_sent": 18,
+      "notifications_dismissed": 2
+    },
+    {
+      "date": "2026-07-02",
+      "notifications_sent": 22,
+      "notifications_dismissed": 5
+    }
+  ]
+}
+```
+
+---
+
+## 6. Key Decision Signals
 
 1. **Sender authority.** Admin in society/school/coworker group + operational content → strong `notify` signal.
 2. **Scam signature.** `verified=0` + domain mismatch + high reports + OTP/PIN language → `mute`/`scam`.
@@ -129,15 +255,15 @@ For each message M in `messages.csv`:
 
 ---
 
-## 6. Enum Vocabulary Reference
+## 7. Enum Vocabulary Reference
 
-### 6.1 Output Enums (from `problem_statement.md` — strict contract)
+### 7.1 Output Enums (from `problem_statement.md` — strict contract)
 | Column | Values |
 | :--- | :--- |
 | `action` | `notify`, `digest`, `mute` |
 | `message_type` | `personal`, `urgent`, `event`, `payment`, `business_update`, `promotion`, `greeting`, `forward`, `spam`, `scam`, `unknown` |
 
-### 6.2 Input Enums (observed in dataset — treat semantically, not as hard rules)
+### 7.2 Input Enums (observed in dataset — treat semantically, not as hard rules)
 | Table | Column | Count | Values |
 | :--- | :--- | :--- | :--- |
 | `messages.csv` | `conversation_type` | 3 | `business`, `group`, `personal` |
