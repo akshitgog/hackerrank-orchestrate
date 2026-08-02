@@ -48,20 +48,22 @@ class LLMAdapter:
         self.config = config
         self.cache = cache
         self._semaphore = asyncio.Semaphore(config.execution.max_concurrency)
-        self.max_retries = config.execution.max_retries
+        self.llm_max_retries = config.execution.llm_max_retries
+        self.vlm_max_retries = config.execution.vlm_max_retries
+        self.stt_max_retries = config.execution.stt_max_retries
         self.timeout = config.execution.timeout_seconds
 
-    async def _acompletion_with_retry(self, **kwargs):
+    async def _acompletion_with_retry(self, max_retries: int, **kwargs):
         """Call litellm.acompletion with exponential backoff retry."""
         backoff = 1
         last_error = None
-        for attempt in range(self.max_retries):
+        for attempt in range(max_retries):
             try:
                 async with self._semaphore:
                     return await litellm.acompletion(**kwargs, timeout=self.timeout)
             except Exception as e:
                 last_error = e
-                if attempt < self.max_retries - 1:
+                if attempt < max_retries - 1:
                     logger.warning(f"LLM call attempt {attempt + 1} failed: {e}. Retrying in {backoff}s...")
                     await asyncio.sleep(backoff)
                     backoff *= 2
@@ -102,6 +104,7 @@ class LLMAdapter:
         for attempt in range(2):  # 1 initial + 1 self-correction retry
             try:
                 response = await self._acompletion_with_retry(
+                    max_retries=self.llm_max_retries,
                     model=model_name,
                     messages=messages,
                     response_format={"type": "json_object"},
@@ -131,6 +134,88 @@ class LLMAdapter:
 
         logger.error(f"classify_message failed after all retries for model={model_name}")
         return None
+
+    async def extract_message_signals(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        model: Optional[str] = None,
+    ) -> Optional[str]:
+        """Call LLM text model to extract boolean signals from the raw message. Returns JSON string."""
+        model_name = model or self.config.models.llm_model
+
+        # ── Cache check ──
+        prompt_hash_data = f"{model_name}:{system_prompt}:{user_prompt}".encode("utf-8")
+        prompt_hash = hashlib.sha256(prompt_hash_data).hexdigest()
+        cache_key = self.cache.cache_key(model_name, prompt_hash)
+
+        cached = self.cache.get(cache_key)
+        if cached and "raw" in cached:
+            return cached["raw"]
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        try:
+            response = await self._acompletion_with_retry(
+                max_retries=self.llm_max_retries,
+                model=model_name,
+                messages=messages,
+                response_format={"type": "json_object"},
+            )
+            content = response.choices[0].message.content
+            
+            # Simple JSON parse test just to ensure it's valid JSON
+            json.loads(content)
+            
+            self.cache.put(cache_key, {"raw": content})
+            return content
+        except Exception as e:
+            logger.error(f"extract_message_signals failed: {e}")
+            return None
+
+    async def route_image_text(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        model: Optional[str] = None,
+    ) -> Optional[str]:
+        """Call LLM text model to route an image based on the VLM observer's text report. Returns JSON string."""
+        model_name = model or self.config.models.llm_model
+
+        # ── Cache check ──
+        prompt_hash_data = f"{model_name}:{system_prompt}:{user_prompt}".encode("utf-8")
+        prompt_hash = hashlib.sha256(prompt_hash_data).hexdigest()
+        cache_key = self.cache.cache_key(model_name, prompt_hash)
+
+        cached = self.cache.get(cache_key)
+        if cached and "raw" in cached:
+            return cached["raw"]
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        try:
+            response = await self._acompletion_with_retry(
+                max_retries=self.llm_max_retries,
+                model=model_name,
+                messages=messages,
+                response_format={"type": "json_object"},
+            )
+            content = response.choices[0].message.content
+            
+            # Simple JSON parse test just to ensure it's valid JSON
+            json.loads(content)
+            
+            self.cache.put(cache_key, {"raw": content})
+            return content
+        except Exception as e:
+            logger.error(f"route_image_text failed: {e}")
+            return None
 
     async def analyze_image(
         self,
@@ -167,6 +252,7 @@ class LLMAdapter:
 
         try:
             response = await self._acompletion_with_retry(
+                max_retries=self.vlm_max_retries,
                 model=model_name,
                 messages=messages,
             )
@@ -199,16 +285,26 @@ class LLMAdapter:
         if cached and "text" in cached:
             return cached["text"]
 
-        try:
-            # LiteLLM transcription API
-            response = await litellm.atranscription(
-                model=model_name,
-                file=audio_bytes,
-                timeout=self.timeout,
-            )
-            text = response.text if hasattr(response, "text") else str(response)
-            self.cache.put(cache_key, {"text": text})
-            return text
-        except Exception as e:
-            logger.error(f"STT transcription failed: {e}")
-            return None
+        # STT audio with its own fail-fast retry logic
+        backoff = 1
+        last_error = None
+        for attempt in range(self.stt_max_retries):
+            try:
+                # LiteLLM transcription API (fail-fast timeout)
+                response = await litellm.atranscription(
+                    model=model_name,
+                    file=audio_bytes,
+                    timeout=self.timeout,
+                )
+                text = response.text if hasattr(response, "text") else str(response)
+                self.cache.put(cache_key, {"text": text})
+                return text
+            except Exception as e:
+                last_error = e
+                if attempt < self.stt_max_retries - 1:
+                    logger.warning(f"STT call attempt {attempt + 1} failed: {e}. Retrying...")
+                    await asyncio.sleep(backoff)
+                    backoff *= 2
+
+        logger.error(f"STT audio transcription failed: {last_error}")
+        return None

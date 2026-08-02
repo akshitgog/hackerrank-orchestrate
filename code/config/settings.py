@@ -38,7 +38,9 @@ class ModelConfig(BaseModel):
 
 class ExecutionConfig(BaseModel):
     """Pipeline execution parameters."""
-    max_retries: int
+    llm_max_retries: int
+    vlm_max_retries: int
+    stt_max_retries: int
     max_concurrency: int
     timeout_seconds: int
 

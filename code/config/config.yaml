@@ -1,24 +1,27 @@
 models:
   # ── Swappable AI Provider Models (via LiteLLM) ──
   # LiteLLM automatically routes requests based on the prefix:
-  #   • AWS Bedrock   : "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0" (requires AWS keys)
-  #   • Fireworks AI  : "fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct" (requires FIREWORKS_API_KEY)
-  #   • Google Gemini : "gemini/gemini-2.5-flash", "gemini/gemini-1.5-pro" (requires GEMINI_API_KEY)
-  #   • OpenAI        : "openai/gpt-4o", "openai/gpt-4o-mini"               (requires OPENAI_API_KEY)
-  #   • Anthropic     : "anthropic/claude-3-5-sonnet-20241022"               (requires ANTHROPIC_API_KEY)
+  #   • AWS Bedrock   : "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0", "bedrock/amazon.nova-micro-v1:0"
+  #   • Fireworks AI  : "fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct"
+  #   • Google Gemini : "gemini/gemini-2.5-flash"
+  #   • OpenAI        : "openai/gpt-4o", "openai/gpt-4o-mini"
+  #   • Deepgram      : "deepgram/nova-3"
   #
   # Active configuration (auto-overridden by settings.py if other API keys are present in .env):
-  llm_model: "gemini/gemini-2.5-flash"    # Text semantic classification
-  vlm_model: "gemini/gemini-2.5-flash"    # Image OCR / poster inspection
-  stt_model: "openai/whisper-1"           # Voice note transcription
+  llm_model: "bedrock/amazon.nova-micro-v1:0"    # Text semantic classification (cheapest text model)
+  vlm_model: "bedrock/amazon.nova-2-lite-v1:0"                         # Image OCR / poster inspection
+  stt_model: "deepgram/nova-3"                   # Voice note transcription (fast multilingual STT)
 
 execution:
-  max_retries: 3
-  max_concurrency: 10
-  timeout_seconds: 30
+  llm_max_retries: 5      # Increased retry rate for bedrock rate limits
+  vlm_max_retries: 3      
+  stt_max_retries: 1      # Low retry rate to fail-fast on slow audio processing
+  max_concurrency: 3      # Reduced to avoid Bedrock throttling
+  timeout_seconds: 10
 
 media:
-  image_long_edge_px: 2576
+  # It is the user's responsibility to update this resolution based on their chosen VLM's constraints (e.g., 1024, 1120).
+  image_long_edge_px: 1120
   enable_zoom_inspection: true
 
 paths:

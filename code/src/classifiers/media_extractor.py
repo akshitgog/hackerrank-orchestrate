@@ -12,7 +12,7 @@ import logging
 import os
 from pathlib import Path
 from .schema_models import MediaExtraction
-from .prompt_loader import build_vlm_prompt, clean_stt_transcription
+from .prompt_loader import build_vlm_prompt, build_img_router_prompt, clean_stt_transcription
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ except ImportError:
     logger.warning("Pillow not installed. Image preprocessing will be skipped; raw bytes sent to VLM.")
 
 
-async def extract_image(image_id: str, images_index: dict, config, llm_adapter) -> MediaExtraction:
+async def extract_image(message: dict, images_index: dict, config, llm_adapter) -> MediaExtraction:
     """
     Extract text/content from an image via VLM.
 
@@ -41,6 +41,7 @@ async def extract_image(image_id: str, images_index: dict, config, llm_adapter) 
         return MediaExtraction(transcribed_text="", media_status="extraction_failed", media_type="image")
 
     try:
+        image_id = message.get("media_id", "")
         if image_id not in images_index:
             logger.warning(f"Image {image_id} not found in images index")
             return MediaExtraction(transcribed_text="", media_status="file_missing", media_type="image")
@@ -72,27 +73,51 @@ async def extract_image(image_id: str, images_index: dict, config, llm_adapter) 
             img_b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
         # ── Call VLM for OCR/content analysis ──
-        system_prompt, user_prompt = build_vlm_prompt(image_context=f"Image ID: {image_id}")
+        sender_type = message.get("sender_type", "unknown")
+        conversation_type = message.get("conversation_type", "unknown")
+        
+        system_prompt, user_prompt = build_vlm_prompt(sender_type, conversation_type)
         vlm_result = await llm_adapter.analyze_image(
             image_base64=img_b64,
             prompt=user_prompt,
             model=config.models.vlm_model,
         )
 
-        if vlm_result and "raw" in vlm_result:
-            transcribed = vlm_result["raw"]
-        else:
-            transcribed = ""
+        vlm_json = vlm_result["raw"] if vlm_result and "raw" in vlm_result else ""
+        if not vlm_json:
             logger.warning(f"VLM returned no content for {image_id}")
+            return MediaExtraction(transcribed_text="", media_status="extraction_failed", media_type="image")
+
+        # ── Call Image Router (LLM) ──
+        sender_verified = str(message.get("sender_verified", False))
+        forwarded_count = message.get("forwarded_count", 0)
+        img_sys_prompt, img_user_prompt = build_img_router_prompt(
+            sender_type, conversation_type, sender_verified, forwarded_count, vlm_json
+        )
+        
+        img_router_result = await llm_adapter.route_image_text(
+            system_prompt=img_sys_prompt,
+            user_prompt=img_user_prompt,
+            model=config.models.llm_model,
+        )
+        
+        router_json = img_router_result if img_router_result else "{}"
+        
+        combined_text = (
+            "--- VLM Observer ---\n"
+            f"{vlm_json}\n\n"
+            "--- Image Router ---\n"
+            f"{router_json}"
+        )
 
         return MediaExtraction(
-            transcribed_text=transcribed,
-            media_status="success" if transcribed else "extraction_failed",
+            transcribed_text=combined_text,
+            media_status="success",
             media_type="image",
         )
 
     except Exception as e:
-        logger.error(f"Failed to extract image {image_id}: {e}")
+        logger.error(f"Failed to extract image {message.get('media_id', 'unknown')}: {e}")
         return MediaExtraction(transcribed_text="", media_status="extraction_failed", media_type="image")
 
 

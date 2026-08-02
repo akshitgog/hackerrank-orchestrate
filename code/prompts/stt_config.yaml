@@ -7,24 +7,28 @@ normalization_rules:
   replacements:
     "umm": ""
     "uhh": ""
-    "aah": ""
-    "hmm": ""
+    "uh ": " "
+    "um ": " "
+    "er ": " "
+    "you know": ""
+    "like I said": ""
+    "basically": ""
     " .  ": ". "
     "  ": " "
 
-  # Hindi romanization normalization (common Whisper mistakes)
+  # Hindi romanization normalization (actual Whisper mistakes)
   hindi_fixes:
-    "bhai": "bhai"       # Keep as-is (common address)
-    "yaar": "yaar"       # Keep as-is (informal address)
-    "acha": "acha"       # Keep as-is
-    "theek hai": "theek hai"
-    "kya": "kya"
-    "karo": "karo"
-    "bhej do": "bhej do"
-    "jaldi": "jaldi"     # Important: means "quickly/urgently"
-    "abhi": "abhi"       # Important: means "right now"
+    "take hi": "theek hai"
+    "tech hai": "theek hai"
+    "kal karo": "call karo"
+    "aaj": "aaj"
+    "OT P": "OTP"
+    "o t p": "OTP"
+    "U P I": "UPI"
+    "u p i": "UPI"
+    "what's up": "wassup"
 
-  # Urgency keywords to preserve (never strip these)
+  # Urgency and credential keywords to preserve (never strip these)
   preserve_keywords:
     - "urgent"
     - "emergency"
@@ -37,13 +41,38 @@ normalization_rules:
     - "otp"
     - "password"
     - "pin"
+    - "bachao"
+    - "hospital"
+    - "accident"
+    - "police"
+    - "fire"
+    - "deadline"
+    - "meeting"
+    - "bus"
+    - "train"
+    - "flight"
+    - "kal tak"
+    - "aaj tak"
+    - "cvv"
+    - "account number"
+    - "card number"
+    - "ifsc"
+    - "aadhaar"
+    - "pan"
 
 context_instruction: |
   This is a transcription of a WhatsApp voice note from India.
   The speaker may code-switch between Hindi, English, and Hinglish (mixed).
-  Preserve the original language as spoken. Do not translate Hindi to English.
+  
+  ## INSTRUCTIONS
+  1. Preserve the original language as spoken. Do not translate Hindi to English.
+  2. Output format MUST be plain text. Do NOT use JSON or any markdown formatting.
+  3. Format Indian numbers using lakhs and crores consistently (e.g., "10 lakh" or "10,00,000").
+  4. If the audio is inaudible or unclear, insert "[inaudible]" at that position.
+  5. If the message appears abruptly cut off, end the transcription with "[truncated]".
+  
   Focus on capturing the semantic meaning accurately, especially:
   - Any urgency or time pressure ("jaldi", "abhi", "right now", "ASAP")
   - Any requests for action ("call me", "reply karo", "come online")
-  - Any sensitive requests ("OTP bhejo", "password share karo")
+  - Any sensitive requests ("OTP bhejo", "password share karo", account details)
   - Any names, numbers, or specific instructions

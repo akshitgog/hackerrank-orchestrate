@@ -11,7 +11,6 @@ def obs(
     sensitive=False,
     actionable=True,
     evidence_ids=None,
-    reasoning="Test fixture observation",
     **kw
 ):
     """June-style helper builder for SensorObservation fixtures."""
@@ -19,12 +18,14 @@ def obs(
         evidence_ids = ["none"]
     base = dict(
         content_intent=intent,
+        secondary_intents=[],
         priority_label=priority,
         risk_label=risk,
         contains_sensitive_request=sensitive,
         is_actionable=actionable,
         best_evidence_ids=evidence_ids,
-        reasoning=reasoning,
+        confidence="high",
+        flag_for_review=False,
     )
     base.update(kw)
     return SensorObservation(**base)

@@ -19,8 +19,10 @@ code/
 │   ├── .env                    # Secrets file (API keys, never committed)
 │   └── .env.example            # Template for required environment variables
 ├── prompts/                    # Top-level YAML prompt templates (editable without code changes)
-│   ├── llm_labeler.yaml        # LLM semantic classification system & user prompt
-│   ├── vlm_screener.yaml       # VLM image OCR & content analysis prompt
+│   ├── msg_observer.yaml       # LLM signal extractor for text messages (no intent assignment)
+│   ├── msg_router.yaml         # LLM intent classifier (assigns intent/risk based on signals)
+│   ├── vlm_observer.yaml       # VLM image observation prompt
+│   ├── img_router.yaml         # LLM image classification prompt
 │   └── stt_config.yaml         # STT transcription normalization & Hindi-English rules
 ├── src/                        # APPLICATION SOURCE CODE (Hexagonal / Ports-and-Adapters)
 │   ├── __init__.py
@@ -33,7 +35,7 @@ code/
 │   │   ├── __init__.py
 │   │   ├── schema_models.py    # Pydantic v2 typed seam: SensorObservation, MediaExtraction
 │   │   ├── response_cache.py   # SHA-256 deterministic API response cache (zero duplicate billing)
-│   │   ├── llm_client.py       # LiteLLM async adapter with retry, backoff, and semaphore
+│   │   ├── llm_client.py       # LiteLLM async adapter with decoupled modality retries (llm/vlm/stt) & semaphore
 │   │   ├── media_extractor.py  # Pillow image preprocessing + VLM/STT extraction with fallback
 │   │   └── prompt_loader.py    # Single clean loader for top-level code/prompts/ YAML files
 │   ├── routing_engine/         # LAYER 3: DETERMINISTIC ROUTER (Pure Python, zero network)
@@ -87,9 +89,9 @@ To guarantee zero dropped rows and 100% adherence to the 110-row Completeness In
 
 ### Phase 2: Sensor & Media Layer (`src/sensor/`)
 - [ ] Implement `media.py` using `asyncio` to transcribe `.mp3` voice notes and OCR `.jpg` image circulars/posters. Add graceful exception handling (`media_status = "extraction_failed"`).
-- [ ] Implement `schema.py` defining Pydantic v2 models for LLM JSON output (`content_intent`, `priority_label`, `risk_label`, `best_evidence_ids`, etc.).
-- [ ] Implement `prompt.py` with XML tags (`<user_message>`, `<candidate_history>`) and prompt-injection defense instructions.
-- [ ] Implement `llm.py` with an `asyncio.Semaphore` rate-limiter and 3-attempt exponential backoff.
+- [ ] Implement `schema.py` defining Pydantic v2 models for LLM JSON output (e.g. `SensorObservation`).
+- [ ] Implement Two-Layer LLM flow: `msg_observer` (extract boolean signals) -> `msg_router` (assign intent & risk) to prevent classification collapse.
+- [ ] Implement `llm.py` with an `asyncio.Semaphore` rate-limiter and decoupled modality backoffs (`llm: 3`, `vlm: 2`, `stt: 1`).
 
 ### Phase 3: Deterministic Router Layer (`src/router/`)
 - [ ] Implement `policy.py` containing our **Deterministic Rule-Based Decision Tree**:

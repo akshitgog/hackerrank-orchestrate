@@ -33,7 +33,7 @@ from classifiers.response_cache import ResponseCache
 from classifiers.llm_client import LLMAdapter
 from classifiers.schema_models import SensorObservation, MediaExtraction
 from classifiers.media_extractor import extract_image, extract_audio
-from classifiers.prompt_loader import build_labeler_prompt
+from classifiers.prompt_loader import build_msg_observer_prompt, build_msg_router_prompt
 from routing_engine.decision_tree import route_message, RoutingDecision
 from routing_engine.confidence_calibrator import calibrate_confidence
 from routing_engine.safe_fallback import get_safe_default_row
@@ -91,7 +91,7 @@ async def process_single_message(
         media_ok = True
 
         if media_type == "image" and media_id:
-            media_extraction = await extract_image(media_id, ctx.images, config, llm_adapter)
+            media_extraction = await extract_image(message, ctx.images, config, llm_adapter)
             if media_extraction.media_status != "success":
                 media_ok = False
             else:
@@ -122,18 +122,29 @@ async def process_single_message(
         if business_id:
             business_info = ctx.business_accounts.get(business_id)
 
-        system_prompt, user_prompt = build_labeler_prompt(
+        system_prompt, user_prompt = build_msg_observer_prompt(
             message=enriched_message,
-            history_context=history_context,
             user_profile=user_profile,
             group_info=group_info,
-            business_info=business_info,
         )
 
-        # ── Step 4: Call LLM for semantic labels (async with cache) ──
-        sensor_obs = await llm_adapter.classify_message(
+        # ── Step 4a: Call LLM for signal extraction (async with cache) ──
+        signal_json = await llm_adapter.extract_message_signals(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
+            model=config.models.llm_model,
+        )
+        
+        # ── Step 4b: Call LLM for intent routing (async with cache) ──
+        router_sys_prompt, router_user_prompt = build_msg_router_prompt(
+            message=enriched_message,
+            history_context=history_context,
+            msg_observer_output_json=signal_json,
+        )
+        
+        sensor_obs = await llm_adapter.classify_message(
+            system_prompt=router_sys_prompt,
+            user_prompt=router_user_prompt,
             model=config.models.llm_model,
         )
 

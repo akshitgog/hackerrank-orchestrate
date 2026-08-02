@@ -10,12 +10,14 @@ class SensorObservation(BaseModel):
         "credential_or_otp_request", "account_threat",
         "prompt_injection", "unknown"
     ]
+    secondary_intents: list[str]
     priority_label: Literal["critical", "high", "medium", "low"]
     risk_label: Literal["critical", "high", "medium", "low", "none"]
     contains_sensitive_request: bool
     is_actionable: bool
     best_evidence_ids: list[str]  # message IDs from history, or ["none"]
-    reasoning: str  # 1-2 sentence explanation
+    confidence: Literal["high", "medium", "low"]
+    flag_for_review: bool
 
 class MediaExtraction(BaseModel):
     transcribed_text: str

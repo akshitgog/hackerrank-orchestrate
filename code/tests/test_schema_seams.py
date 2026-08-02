@@ -7,12 +7,14 @@ from src.classifiers.schema_models import SensorObservation, MediaExtraction
 def test_valid_sensor_observation():
     obs = SensorObservation(
         content_intent="emergency",
+        secondary_intents=[],
         priority_label="high",
         risk_label="none",
         contains_sensitive_request=False,
         is_actionable=True,
         best_evidence_ids=["none"],
-        reasoning="Medical alert reported"
+        confidence="high",
+        flag_for_review=False
     )
     assert obs.content_intent == "emergency"
     assert obs.priority_label == "high"
