@@ -1,14 +1,33 @@
 # Message Notification Router
 
-This project looks at the context of an incoming WhatsApp message (the text, images, voice notes, the sender's history, and your DND status) and decides whether that message should **notify** you immediately, be saved for a **digest**, or be silently **muted**. It then fills in a structured record explaining exactly why that decision was made.
+> **HackerRank Orchestrate Hackathon · August 2026**
 
-I built it for the **HackerRank Orchestrate** hackathon (August 2026), a 24-hour event to design and ship an AI agent.
+Most notification systems ask *"is this message important?"* — this one asks **"is this message important to *this* user?"**
+
+It reads an incoming WhatsApp message (text, images, voice notes), cross-references the sender's history and the user's engagement patterns, then routes to one of three actions: **notify**, **digest**, or **mute** — with a structured explanation of exactly why.
+
+**TL;DR**
+- 2 LLM calls per message (observer → router); all other logic is pure Python
+- Per-user engagement scores built from 11 CSVs; the LLM never sees them
+- 9-gate deterministic decision tree; safety gates cannot be overridden
+- SHA-256 content cache — repeat runs complete in <2s at zero cost
 
 ---
 
-## What it produces
+## Output
 
-For every message, the agent emits a fixed 6-column row: `message_id`, `action`, `message_type`, `reason`, `confidence`, and `evidence_message_ids`. Allowed values for every field live in one place (`schema_models.py`) so the prompt, the validator, and the output can never drift apart.
+Each message produces exactly one row in `output.csv`:
+
+| Column | Example |
+|---|---|
+| `message_id` | `msg_042` |
+| `action` | `digest` |
+| `message_type` | `promotion` |
+| `reason` | `low engagement with sender` |
+| `confidence` | `0.72` |
+| `evidence_message_ids` | `msg_011, msg_019` |
+
+All allowed values are defined once in `schema_models.py` — the prompt, validator, and CSV writer share the same source and cannot drift.
 
 ---
 
@@ -16,96 +35,109 @@ For every message, the agent emits a fixed 6-column row: `message_id`, `action`,
 
 Two LLM calls drive a chain-of-thought perception loop per message. All context is pre-fetched in pure Python; the model never sees engagement scores or makes the final routing call.
 
-```
-messages.csv + 10 context CSVs + media/
-        |
-        v
-Deterministic loading            context/load_dataset.py, user_profiles.py
-  . user profile, DND, group membership, business relationship
-  . per-source engagement score (opened / dismissed — pure math)
-  . sender interaction rates (open, dismiss, reply)
-        |
-        v
-Media extraction                 classifiers/media_extractor.py
-  . image -> VLM observation -> LLM image router (2 calls, cached)
-  . voice -> Deepgram STT -> normalization (cached)
-        |
-        v
-Chain-of-thought perception      classifiers/llm_client.py
-  . Call 1 (msg_observer):       boolean signal extraction from message text
-  . Call 2 (msg_router):         intent classification from signals (not raw text)
-  . both cached by SHA-256 of prompt content
-        |
-        v
-Pydantic typed seam              classifiers/schema_models.py
-  . SensorObservation: validates every LLM field against Literal enums
-  . invalid output -> fallback to regex heuristic (never crashes)
-        |
-        v
-Deterministic decision tree      routing_engine/decision_tree.py
-  . 8 gates in strict priority order (see below)
-  . engagement score applied here, not in the LLM prompt
-        |
-        v
-Confidence calibration           routing_engine/confidence_calibrator.py
-        |
-        v
-output.csv   (6 columns, deterministic row order)
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│  INPUT  ·  messages.csv + 10 context CSVs + media/                        │
+└────────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  DETERMINISTIC LOADING  ·  load_dataset.py  —  profile, DND, engagement   │
+└────────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  MEDIA EXTRACTION  ·  media_extractor.py  —  image→VLM  ·  voice→STT      │
+└────────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  LLM PERCEPTION  ·  llm_client.py  —  observer→router, SHA-256 cached     │
+└────────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  PYDANTIC SEAM  ·  schema_models.py  —  enum checks, regex fallback       │
+└────────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  DECISION TREE  ·  decision_tree.py  —  9 gates, engagement applied       │
+└────────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  CONFIDENCE CALIBRATION  ·  confidence_calibrator.py                      │
+└────────────────────────────────────┬──────────────────────────────────────┘
+                                     │
+                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  OUTPUT  ·  output.csv  —  6 columns, deterministic row order             │
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
-A single failing message never crashes a batch: `safe_fallback.py` degrades it to a conservative fallback row (`digest` / `unknown` / confidence 0.50) so `output.csv` always has exactly one row per input.
+| Stage | What happens |
+|---|---|
+| **Input** | 11 CSV files + media folder loaded as the raw dataset |
+| **Deterministic Loading** | Builds user profile, DND status, group membership, business relationship, and per-source engagement scores — pure Python, no LLM |
+| **Media Extraction** | Images routed through VLM observation + LLM image classifier (2 calls); voice notes transcribed via Deepgram STT — both cached |
+| **LLM Perception** | Call 1 (`msg_observer`) extracts boolean signals from message text; Call 2 (`msg_router`) classifies intent from those signals, not raw text |
+| **Pydantic Seam** | `SensorObservation` validates every LLM field against `Literal` enums; invalid output silently falls back to regex heuristic |
+| **Decision Tree** | 9 gates in strict priority order apply engagement scores and route to `notify`, `digest`, or `mute` — LLM never touches this |
+| **Confidence Calibration** | Adjusts raw confidence based on gate fired, signal strength, and engagement tier |
+| **Output** | One deterministic row per message: `message_id`, `action`, `message_type`, `reason`, `confidence`, `evidence_message_ids` |
+
+A single failing message never crashes a batch — `safe_fallback.py` writes a conservative `digest / unknown / 0.50` row so `output.csv` always has exactly one row per input.
 
 ---
 
 ## Key design decisions
 
-### User profiling as the central design choice
+### Personalization as the core insight
 
-The problem statement says: *"A sale poster may be useful for one user and unwanted noise for another."* Most systems answer "is this message important?" — ours answers **"is this message important TO THIS USER?"** by building a per-source engagement profile from dataset columns that most systems ignore.
+The problem statement says: *"A sale poster may be useful for one user and unwanted noise for another."*
 
-**Three engagement tiers from three different tables.** The system computes `opened / (opened + dismissed)` at three granularities, then picks the most specific one available:
+This system computes a per-source engagement score — `opened / (opened + dismissed)` — at three granularities, then picks the most specific one available:
 
-| Tier | Source table | Columns used | What it captures |
-|---|---|---|---|
-| Global | `users.csv` | `messages_opened_30d`, `notifications_dismissed_30d` | Is this user generally engaged? |
-| Business | `user_business_history.csv` | `messages_opened_30d`, `messages_dismissed_30d` | Does this user care about *this brand*? |
-| Group | `group_members.csv` | `messages_read_30d`, `notifications_dismissed_30d` | Does this user engage with *this group*? |
+| Tier | Source | What it captures |
+|---|---|---|
+| Business | `user_business_history.csv` | Does this user care about *this brand*? |
+| Group | `group_members.csv` | Does this user engage with *this group*? |
+| Global | `users.csv` | Is this user generally engaged? |
 
-Selection priority: business > group > global. A message from Zepto to a user who opened 8/9 messages from Zepto gets a different routing decision than the same message to a user who dismissed 7/9 — without the LLM ever knowing the difference.
+A Zepto message to a user who opened 8 of 9 Zepto messages routes differently than the same message to one who dismissed 7 of 9 — without the LLM ever knowing the score.
 
-**Personalization can only demote, never upgrade.** Gate 3.7 (low engagement demotion) sits *below* the safety gates in the decision tree. If `source_engagement < 0.25` and priority isn't critical/high, the message demotes to `digest`. But a genuine scam is still muted at Gate 1 regardless of engagement, and an emergency still notifies at Gate 3. This is a structural guarantee in the gate ordering, not a prompt instruction the model might ignore.
+**Personalization can only demote, never upgrade.** Gate 3.7 sits below all safety gates. A scam is still muted at Gate 1 regardless of engagement. An emergency still notifies at Gate 3. This is a structural guarantee in the gate ordering, not a prompt instruction.
 
-**Engagement stays out of the LLM prompt.** The engagement score feeds the deterministic decision tree only. The LLM prompt never sees it — keeping the SHA-256 cache hash stable across re-runs. Repeat runs with no code changes complete in under 2 seconds at zero cost. Most systems would ask the LLM "does this user care about this sender?" — expensive, non-deterministic, and uncacheable.
-
-See [`doc/ARCHITECTURE_PLANNING.md` §5.7](doc/ARCHITECTURE_PLANNING.md) for the full engagement computation and [`doc/DATASET_ANALYSIS.md` §3](doc/DATASET_ANALYSIS.md) for which dataset columns map to which personalization signals.
+**Engagement stays out of the LLM prompt** — keeping the SHA-256 cache hash stable across re-runs. Repeat runs with no code changes complete in under 2 seconds at zero cost.
 
 ---
 
-### Supporting design decisions
+### Other decisions that mattered
 
-**Safety gate in code, not in the prompt.** Prompt instructions can be argued away by adversarial message content; post-model rules cannot. Gate 1 unconditionally mutes phishing regardless of what the LLM says about priority or actionability.
+**Safety in code, not prompts.** Prompt instructions can be argued away by adversarial message content; post-model rules cannot. Gate 1 unconditionally mutes phishing regardless of what the LLM returns.
 
-**Two-stage chain-of-thought.** A single prompt that both observes AND classifies forces the model to resolve ambiguous messages into one bucket. Splitting into observer (what signals exist?) and router (what do they mean?) means you can trace errors to exactly one stage and fix it with a prompt edit.
+**Two-stage chain-of-thought.** Splitting into observer (what signals exist?) and router (what do they mean?) means errors are traceable to one stage and fixable with one prompt edit.
 
-**Protecting operational alerts.** The LLM flagged work messages ("missed water supply", "server deadline") as high-risk threats because they contained urgency language. One sentence in `msg_router.yaml` ("Never assign high risk to operational messages without credential signals") fixed both false positives permanently.
+**One sentence fixed two false positives.** The LLM flagged work messages ("missed water supply", "server deadline") as high-risk because they contained urgency language. Adding *"Never assign high risk to operational messages without credential signals"* to `msg_router.yaml` fixed both permanently.
 
 ---
 
-## The 8-Gate Decision Tree
+## The 9-Gate Decision Tree
 
-| Gate | What it does |
-|---|---|
-| **Gate 1** — Scam / Phishing | Mutes anything with credential requests, account threats, prompt injection, or high risk — splits into `scam` (phishing) vs `spam` (suspicious but no credentials). |
-| **Gate 2** — Promo opt-out | Mutes promotional messages when the user has `allows_promotions=0` in their business relationship. |
-| **Gate 3** — Emergency override | Forces `notify`/`urgent` for critical-priority + low-risk messages, even during DND or muted groups. |
-| **Gate 3.5** — Sender fatigue | Mutes low-value intents (forwards, greetings, promos) when the sender's dismiss rate is ≥50% or they have zero opens. |
-| **Gate 3.7** — Low engagement | Demotes to `digest` when `source_engagement < 0.25` and priority isn't critical/high — the personalization gate. |
-| **Gate 4** — Actionable high-priority | Notifies when priority is `high` AND the message is actionable or sender is admin. |
-| **Gate 5** — DND / muted group | Digests non-urgent messages during quiet hours; mutes low-value chatter in user-muted groups. |
-| **Gate 6** — Opted-in promos | Routes promotional content to `digest`/`promotion` when the user still allows promotions. |
-| **Gate 7** — Default fallback | Everything that didn't trigger an earlier gate falls to `digest` with an intent-mapped type. |
+Safety gates (1–3) fire first and cannot be overridden by personalization. Engagement (3.7) only ever demotes — it never upgrades a muted threat.
 
-Safety gates (1–3) fire first and cannot be overridden by personalization. Engagement (3.7) only ever demotes to digest, never upgrades a muted threat. This is a structural guarantee in the gate ordering.
+| Gate | Trigger | Action |
+|---|---|---|
+| **1** — Scam / Phishing | Credential requests, account threats, prompt injection | `mute` → `scam` or `spam` |
+| **2** — Promo opt-out | `allows_promotions=0` in business relationship | `mute` |
+| **3** — Emergency override | Critical priority + low risk | `notify` / `urgent`, DND ignored |
+| **3.5** — Sender fatigue | Dismiss rate ≥50% or zero opens, low-value intent | `mute` |
+| **3.7** — Low engagement | `source_engagement < 0.25`, non-critical priority | `digest` |
+| **4** — Actionable high-priority | Priority `high` + actionable message or admin sender | `notify` |
+| **5** — DND / muted group | Quiet hours or user-muted group | `digest` or `mute` |
+| **6** — Opted-in promos | User allows promotions | `digest` / `promotion` |
+| **7** — Default fallback | Everything else | `digest` with intent-mapped type |
 
 ---
 
@@ -115,27 +147,57 @@ Safety gates (1–3) fire first and cannot be overridden by personalization. Eng
 .
 ├── README.md
 ├── problem_statement.md
-├── dataset/                  11 CSV files + media/images/ + media/audio/
-├── doc/                      design write-ups (architecture, safety, testing, edge cases)
+├── dataset/                  CSV files + media/images/ + media/audio/
+├── doc/                      design write-ups
 └── code/
-    ├── main.py               batch runner: messages.csv -> output.csv
+    ├── main.py
     ├── config/
-    │   ├── config.yaml       model selection, thresholds, engagement config
-    │   └── settings.py       Pydantic v2 fail-fast boot validation
     ├── env/                  .env (secrets, never committed)
-    ├── prompts/              5 YAML templates (editable without code changes)
-    │   ├── msg_observer.yaml     signal extraction (Call 1)
-    │   ├── msg_router.yaml       intent classification (Call 2)
-    │   ├── vlm_observer.yaml     VLM image observation
-    │   ├── img_router.yaml       image classification
-    │   └── stt_config.yaml       STT normalization rules
+    ├── prompts/               YAML templates (editable without code changes)
     ├── src/
-    │   ├── context/          dataset loading, user profiles, engagement scores
-    │   ├── classifiers/      LLM/VLM/STT adapters, cache, schema validation
-    │   ├── routing_engine/   decision tree, confidence calibrator, safe fallback
-    │   └── output_validator/ 110-row completeness + enum + evidence checks
-    ├── tests/                15 offline tests (no API key needed)
-    └── evaluation/           scoring tools + ground-truth comparison
+    │   ├── context/
+    │   ├── classifiers/
+    │   ├── routing_engine/
+    │   └── output_validator/
+    ├── tests/
+    └── evaluation/
+```
+
+### File guide
+
+| Path | Purpose |
+|---|---|
+| `README.md` | Project overview |
+| `problem_statement.md` | Original hackathon problem statement |
+| `dataset/` | 11 CSV files + `media/images/` + `media/audio/` |
+| `doc/` | Design write-ups — architecture, safety, testing, edge cases |
+| `code/main.py` | Batch runner: `messages.csv` → `output.csv` |
+| `code/config/config.yaml` | Model selection, thresholds, engagement config |
+| `code/config/settings.py` | Pydantic v2 fail-fast boot validation |
+| `code/env/` | `.env` (secrets, never committed) |
+| `code/prompts/msg_observer.yaml` | Signal extraction (Call 1) |
+| `code/prompts/msg_router.yaml` | Intent classification (Call 2) |
+| `code/prompts/vlm_observer.yaml` | VLM image observation |
+| `code/prompts/img_router.yaml` | Image classification |
+| `code/prompts/stt_config.yaml` | STT normalization rules |
+| `code/src/context/` | Dataset loading, user profiles, engagement scores |
+| `code/src/classifiers/` | LLM/VLM/STT adapters, cache, schema validation |
+| `code/src/routing_engine/` | Decision tree, confidence calibrator, safe fallback |
+| `code/src/output_validator/` | 110-row completeness + enum + evidence checks |
+| `code/tests/` | 15 offline tests (no API key needed) |
+| `code/evaluation/` | Scoring tools + ground-truth comparison |
+
+---
+
+## Setup & running
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp code/env/.env.example code/env/.env   # add your API keys
+
+python code/main.py                      # full pipeline
+cd code && python -m pytest tests/ -q   # offline tests, no API key needed
 ```
 
 ---
@@ -151,6 +213,13 @@ models:
   stt_model: "deepgram/nova-3"                   # Voice note transcription
 ```
 
+Override at runtime: `export ORCHESTRATE_LLM_MODEL="gemini/gemini-2.5-flash"`
+
+If model names are absent from `config.yaml`, the system auto-selects based on whichever API key it finds.
+
+<details>
+<summary>All supported providers</summary>
+
 | Provider | Prefix | Required env var |
 |---|---|---|
 | AWS Bedrock | `bedrock/` | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` |
@@ -160,74 +229,46 @@ models:
 | Fireworks AI | `fireworks_ai/` | `FIREWORKS_API_KEY` |
 | Deepgram (STT) | `deepgram/` | `DEEPGRAM_API_KEY` |
 
-Override at runtime without touching the config:
-```bash
-export ORCHESTRATE_LLM_MODEL="gemini/gemini-2.5-flash"
-python code/main.py
-```
-
-If model names are absent from `config.yaml`, the system auto-selects based on whichever API key it finds.
-
----
-
-## Setup & Running
-
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp code/env/.env.example code/env/.env   # add your API keys
-
-# Run the full pipeline
-python code/main.py
-
-# Run offline tests (no API key needed, <1s)
-cd code && python -m pytest tests/ -q
-```
+</details>
 
 ---
 
 ## Testing
 
-15 tests across 4 tiers, all offline:
+15 tests across 4 tiers, all offline — no API key needed:
 
-- **Schema boundaries:** Pydantic rejects invalid LLM output enum values
-- **Regression fixtures:** 9 critical edge cases (emergency override, scam suppression, DND)
-- **Randomized invariant fuzzing:** 500 permutations proving the tree never emits invalid actions or out-of-bounds confidence
-- **Dataset acceptance:** CSV integrity and 110-row completeness
+- **Schema boundaries** — Pydantic rejects invalid LLM output enum values
+- **Regression fixtures** — 9 critical edge cases (emergency override, scam suppression, DND)
+- **Randomized invariant fuzzing** — 500 permutations proving the tree never emits invalid actions or out-of-bounds confidence
+- **Dataset acceptance** — CSV integrity and 110-row completeness
 
 ---
 
-## Software engineering principles applied
+## Software engineering principles
 
-### Architecture patterns
+<details>
+<summary>Architecture patterns</summary>
 
-| Pattern | Where it shows up |
-|---|---|
-| **Hexagonal architecture (Ports & Adapters)** | Core routing logic has zero knowledge of external services. LLM providers (Bedrock, Gemini, OpenAI) sit behind an adapter port (`llm_client.py` → LiteLLM). Dataset files enter through a loading port (`load_dataset.py`). Output exits through a validation port (`output_validator/`). The core domain (`decision_tree.py`) is testable with no network, no API keys, no filesystem. |
-| **Chain of Responsibility** | The 8-gate decision tree is a literal chain — each gate either handles the message and returns a decision, or passes control to the next gate. Adding Gate 3.7 required zero changes to existing gates. |
-| **Strategy pattern** | Media extraction selects strategy by `media_type`: VLM pipeline for images, STT pipeline for voice, no-op for text-only. Each strategy is interchangeable behind the same interface. |
-| **Pipeline pattern (async)** | Each message flows through context→media→observer→router→decision→calibration stages via `asyncio.gather` with semaphore-bounded concurrency. Stages are composable and independently testable. |
-| **Cache-aside pattern** | SHA-256 of prompt content → check local cache → hit returns instantly, miss calls API and stores. Content-addressed, so identical prompts across different messages share cache entries. |
+**Hexagonal architecture (Ports & Adapters)** — Core routing logic has zero knowledge of external services. LLM providers sit behind `llm_client.py` → LiteLLM. Dataset files enter through `load_dataset.py`. Output exits through `output_validator/`. The core domain (`decision_tree.py`) is testable with no network, no API keys, no filesystem.
 
-### SOLID & engineering principles
+**Strategy pattern** — Media extraction selects strategy by `media_type`: VLM pipeline for images, STT for voice, no-op for text. Each strategy is interchangeable behind the same interface.
 
-| Principle | Where it shows up |
-|---|---|
-| **Separation of concerns** | LLM only extracts signals; pure Python decides routing. Neither layer knows the other's internals — they communicate through a typed Pydantic contract (`SensorObservation`). |
-| **Single source of truth** | All allowed enum values live in `schema_models.py`. The prompt, the validator, and the CSV writer all derive from one definition — they cannot drift. |
-| **Fail-safe defaults** | Any unhandled exception produces a conservative `digest`/`unknown`/0.50 row via `safe_fallback.py`. The system never drops a row, never crashes a batch, and never emits an undeserved `notify`. |
-| **Deterministic reproducibility** | SHA-256 content-addressed cache on every LLM call. Same input → same hash → same cached response. Zero cost on re-runs, bit-for-bit identical output. |
-| **Open/closed principle** | New gates are added by inserting a function at a priority level — existing gates don't change. Gate 3.7 (engagement) was added without modifying Gates 1–6. |
-| **Dependency inversion** | The decision tree depends on abstract label enums, not on which LLM produced them. Swapping the model (Bedrock → Gemini → OpenAI) changes one config line, not the routing logic. |
-| **Defensive input handling** | Message text is untrusted user data. The prompt wraps it in XML tags and instructs the model to classify adversarial override attempts as `prompt_injection`. Code enforces the mute — the model only flags. |
-| **Configuration over code** | Thresholds (`low_engagement_threshold`, confidence per gate, model names) live in `config.yaml`. Tuning doesn't require a code change or a re-deploy. Pydantic validates the config at boot. |
-| **Spec-first testing** | Tests are derived from `problem_statement.md` invariants, not from implementation. 500 randomized permutations prove the tree never violates spec contracts regardless of input combination. |
+**Pipeline pattern (async)** — Each message flows through context → media → observer → router → decision → calibration via `asyncio.gather` with semaphore-bounded concurrency. Stages are composable and independently testable.
+
+**Dependency inversion** — The decision tree depends on abstract label enums, not on which LLM produced them. Swapping models changes one config line, not the routing logic.
+
+**Defensive input handling** — Message text is untrusted. The prompt wraps it in XML tags and classifies adversarial override attempts as `prompt_injection`. Code enforces the mute — the model only flags.
+
+</details>
 
 ---
 
 ## Lessons learned
 
-- **Let the model observe; let code decide.** Auditability and safety guarantees come almost for free when the LLM only extracts signals and deterministic gates make the final call.
-- **Keep volatile data out of the LLM prompt.** Engagement scores belong in the decision tree, not the prompt. This preserves cache stability and keeps costs near zero on repeat runs.
-- **Be explicit about what you constrain.** The single most impactful fix was one sentence in the router prompt. Explicit constraints beat hoping the model figures it out.
-- **Personalize with math, not prompts.** An engagement ratio in 5 lines of Python is deterministic, testable, and free. Asking an LLM the same question is expensive and unreliable.
+**Let the model observe; let code decide.** Auditability and safety guarantees come almost for free when the LLM only extracts signals and deterministic gates make the final call.
+
+**Keep volatile data out of the LLM prompt.** Engagement scores belong in the decision tree, not the prompt. This preserves cache stability and keeps costs near zero on repeat runs.
+
+**Be explicit about what you constrain.** The single most impactful fix was one sentence in the router prompt. Explicit constraints beat hoping the model figures it out.
+
+**Personalize with math, not prompts.** An engagement ratio in 5 lines of Python is deterministic, testable, and free. Asking an LLM the same question is expensive and unreliable.
