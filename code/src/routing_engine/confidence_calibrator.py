@@ -31,6 +31,7 @@ def calibrate_confidence(decision: RoutingDecision, gate_name: str, media_ok: bo
         "gate_emergency": conf.gate_emergency,
         "gate_actionable": conf.gate_actionable,
         "gate_dnd_digest": conf.gate_dnd_digest,
+        "gate_low_engagement": conf.gate_low_engagement,
         "default": conf.default,
     }
     base_conf = gate_map.get(gate_name, conf.default)

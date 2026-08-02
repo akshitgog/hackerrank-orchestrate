@@ -149,13 +149,10 @@ def clean_stt_transcription(raw_text: str) -> str:
 
     rules = config.get("normalization_rules", {})
     replacements = rules.get("replacements", {})
-    hindi_fixes = rules.get("hindi_fixes", {})
 
     text = raw_text
     for pattern, replacement in replacements.items():
         text = text.replace(pattern, replacement)
-    for pattern, replacement in hindi_fixes.items():
-        text = re.sub(re.escape(pattern), replacement, text, flags=re.IGNORECASE)
 
     text = re.sub(r"\s+", " ", text).strip()
     return text

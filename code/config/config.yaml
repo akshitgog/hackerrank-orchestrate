@@ -25,9 +25,12 @@ media:
 
 paths:
   dataset_dir: "dataset"
-  messages_file: "messages.csv"
+  messages_file: "sample_messages.csv"
   output_file: "code/evaluation/output.csv"
   cache_dir: "code/.cache"
+
+personalization:
+  low_engagement_threshold: 0.25
 
 confidence:
   gate_scam: 0.95
@@ -35,6 +38,7 @@ confidence:
   gate_emergency: 0.95
   gate_actionable: 0.90
   gate_dnd_digest: 0.85
+  gate_low_engagement: 0.80
   default: 0.70
   media_failure_penalty: 0.15
   fallback_default: 0.50

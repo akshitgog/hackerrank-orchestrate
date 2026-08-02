@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 from config.settings import load_config
 from context.load_dataset import load_all_data, DatasetContext
 from context.message_history import get_sender_history, get_business_history, get_group_history, get_sender_events
-from context.user_profiles import get_user_profile, is_in_dnd, get_group_membership, get_business_relationship, get_notification_fatigue
+from context.user_profiles import get_user_profile, is_in_dnd, get_group_membership, get_business_relationship, get_notification_fatigue, get_source_engagement
 from classifiers.response_cache import ResponseCache
 from classifiers.llm_client import LLMAdapter
 from classifiers.schema_models import SensorObservation, MediaExtraction
@@ -88,13 +88,14 @@ async def process_single_message(
         # Build interaction history
         fatigue_score = get_notification_fatigue(ctx, user_id)
         sender_events = get_sender_events(ctx, user_id, sender_user_id) if sender_user_id else {}
+        engagement = get_source_engagement(ctx, user_id, sender_user_id, group_id, business_id)
         interaction_history = {
             "global_fatigue_score": fatigue_score,
             "sender_dismiss_rate": sender_events.get("dismiss_rate", 0.0),
             "sender_reply_rate": sender_events.get("reply_rate", 0.0),
             "sender_open_rate": sender_events.get("open_rate", 1.0),
             "sender_sent_count": sender_events.get("sent", 0),
-            "business_allows_promotions": business_rel.get("allows_promotions", "1") if business_rel else "1"
+            "business_allows_promotions": business_rel.get("allows_promotions", "1") if business_rel else "1",
         }
 
         # ── Step 2: Extract media if present (async with retry) ──
@@ -172,6 +173,7 @@ async def process_single_message(
             **user_profile,
             "dnd_active": "1" if dnd_active else "0",
             **interaction_history,
+            **engagement,
         }
         # Merge business opt-out info into profile for Gate 2
         router_business = None
@@ -237,6 +239,8 @@ def _determine_gate_name(decision: RoutingDecision) -> str:
         return "gate_emergency"
     elif decision.action == "notify":
         return "gate_actionable"
+    elif "low engagement" in decision.reason:
+        return "gate_low_engagement"
     elif decision.action == "digest":
         return "gate_dnd_digest"
     return "default"

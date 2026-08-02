@@ -28,7 +28,7 @@ code/
 │   ├── context/                # LAYER 1: DATASET & CONTEXT STORE (Pure Python)
 │   │   ├── load_dataset.py     # DatasetContext: indexes all CSV files with typed primary keys
 │   │   ├── message_history.py  # On-demand sender/business/group history lookups
-│   │   └── user_profiles.py    # DND quiet hours, fatigue score, group membership, business opt-out
+│   │   └── user_profiles.py    # DND quiet hours, fatigue, group membership, engagement ratios
 │   ├── classifiers/            # LAYER 2: PROBABILISTIC CLASSIFIERS & EXTRACTORS (LLM/VLM/STT)
 │   │   ├── schema_models.py    # Pydantic v2 typed seam: SensorObservation, MediaExtraction
 │   │   ├── response_cache.py   # SHA-256 deterministic API response cache

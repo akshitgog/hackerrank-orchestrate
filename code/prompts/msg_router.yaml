@@ -109,6 +109,7 @@ system: |
   ## RISK LABEL RULES
   - critical: prompt_injection OR (credential_or_otp_request AND has_account_threat)
   - high: credential_or_otp_request OR account_threat OR extracted_urls with credential ask
+          (CRITICAL: Never assign 'high' or 'critical' risk to 'urgent_operational' or 'event' messages unless credentials are explicitly requested.)
   - medium: has_forward_markers AND (has_urgency_language OR has_credential_request)
              OR unknown sender with action request
   - low: minor concern, likely safe

@@ -89,8 +89,12 @@ def route_message(
     # Gate 1: Scam / Phishing / Prompt Injection
     # Edge Cases: EC-01 (OTP phishing), EC-02 (domain impersonation), EC-13 (prompt injection)
     # ─────────────────────────────────────────────────────────────
-    if risk_label in ("high", "critical"):
-        return RoutingDecision("mute", "scam", "High risk content detected by semantic analysis.", 0.0, "none")
+    if risk_label == "critical":
+        return RoutingDecision("mute", "scam", "Critical risk content detected by semantic analysis.", 0.0, "none")
+    if risk_label == "high":
+        if content_intent in ("credential_or_otp_request", "account_threat", "prompt_injection"):
+            return RoutingDecision("mute", "scam", "High risk phishing or account threat detected.", 0.0, "none")
+        return RoutingDecision("mute", "spam", "High risk suspicious content from untrusted source.", 0.0, "none")
     if content_intent in ("credential_or_otp_request", "account_threat", "prompt_injection"):
         return RoutingDecision("mute", "scam", "Credential phishing, account threat, or prompt injection detected.", 0.0, "none")
     if contains_sensitive and not _is_verified_business(message, business_relationship):
@@ -128,6 +132,18 @@ def route_message(
         if sender_dismiss_rate >= 0.5 or (sender_sent_count >= 2 and sender_open_rate == 0.0):
             msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "unknown")
             return RoutingDecision("mute", msg_type, "Sender has a pattern of ignored low-value messages.", 0.0, "none")
+
+    # ─────────────────────────────────────────────────────────────
+    # Gate 3.7: Low Engagement Demotion
+    # If the user consistently ignores this source, demote to digest
+    # unless the content is urgent/emergency (safety takes priority)
+    # ─────────────────────────────────────────────────────────────
+    source_engagement = float(user_profile.get("source_engagement", 0.5))
+    low_engagement_threshold = getattr(getattr(config, 'personalization', None), 'low_engagement_threshold', 0.25)
+
+    if source_engagement < low_engagement_threshold and priority_label not in ("critical", "high"):
+        msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "personal")
+        return RoutingDecision("digest", msg_type, "User has low engagement with this source — routing to digest.", 0.0, "none")
 
     # ─────────────────────────────────────────────────────────────
     # Gate 4: Actionable Operational / High Priority

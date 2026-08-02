@@ -9,6 +9,7 @@ This architecture is built upon four core operational pillars:
 2. **Media-First Pipeline (STT & VLM):** Media is inspected and transcribed/extracted *before* semantic labeling.
 3. **LLM Outputs Pure Categorical Labels (Including History Match):** The LLM never outputs numeric scores or confidence values. It receives the incoming message and pre-filtered candidate history, outputting categorical labels and selecting matching evidence IDs.
 4. **Deterministic Rule-Based Decision Tree (No Averages):** Python executes absolute short-circuit gates and a deterministic decision tree so crucial messages are never diluted by averages.
+5. **Per-Source Engagement Personalization:** Pure Python engagement ratios (opened/dismissed) from `users.csv`, `user_business_history.csv`, and `group_members.csv` feed the decision tree directly — answering "is this message important TO THIS USER?" not just "is this message objectively important?"
 
 ---
 
@@ -110,6 +111,14 @@ When evaluating message `M` for `user_id`, Python retrieves historical context:
 ### 5.6 `notification_fatigue` (from `daily_notification_summary.csv`)
 - Computes dismiss/sent ratio across recent days for the user.
 
+### 5.7 `source_engagement` (from `users.csv`, `user_business_history.csv`, `group_members.csv`)
+- Computes per-source engagement ratios to personalize routing:
+  - `global_engagement`: user's `messages_opened_30d / (opened + dismissed)` from `users.csv`
+  - `business_engagement`: per user×business `opened / (opened + dismissed)` from `user_business_history.csv`
+  - `group_engagement`: per user×group `messages_read_30d / (read + dismissed)` from `group_members.csv`
+  - `source_engagement`: picks the most relevant score (business > group > global)
+- These ratios feed Gate 3.7 in the decision tree (deterministic, no LLM needed).
+
 ---
 
 ## 6. Deterministic Rule-Based Decision Tree
@@ -121,16 +130,17 @@ To prevent the **Dilution Problem** (where crucial actionable messages get downg
 2. **Gate 2 — Promotional Consent:** If `content_intent == promotion_or_offer` AND user opted out of promotions -> `mute` / `promotion`.
 3. **Gate 3 — Emergency Override:** If `priority_label == critical` AND `risk_label` in `[none, low]` -> `notify` / `urgent`. Overrides DND and muted groups.
 
-### 6.2 Sender Fatigue & Actionable Rules
-4. **Gate 3.5 — Sender Fatigue:** If low-value intent AND high dismiss rate or zero opens from sender -> `mute`.
-5. **Gate 4 — Actionable High-Priority:** If `priority_label == high` AND (`is_actionable` OR sender is admin) -> `notify`.
+### 6.2 Sender Fatigue, Engagement & Actionable Rules
+4. **Gate 3.5 — Sender Fatigue:** If low-value intent AND high dismiss rate or zero opens from sender -> `mute` / `spam`.
+5. **Gate 3.7 — Low Engagement Demotion:** If `source_engagement < low_engagement_threshold` (default 0.25) AND priority is NOT critical/high -> `digest`. Personalizes routing based on whether the user actually engages with this source.
+6. **Gate 4 — Actionable High-Priority:** If `priority_label == high` AND (`is_actionable` OR sender is admin) -> `notify`.
 
 ### 6.3 Quiet Hours & Group Mute Handling
-6. **Gate 5 — DND / Muted Group:** Muted group + low-value content -> `mute`. DND + non-urgent -> `digest`. Highly forwarded chains -> `mute`.
+7. **Gate 5 — DND / Muted Group:** Muted group + low-value content -> `mute`. DND + non-urgent -> `digest`. Highly forwarded chains -> `mute`.
 
 ### 6.4 Opted-In Marketing & Default
-7. **Gate 6 — Opted-In Promo:** If `promotion_or_offer` AND user allows promotions -> `digest` / `promotion`.
-8. **Gate 7 — Default Fallback:** Everything else -> `digest` with appropriate `message_type`.
+8. **Gate 6 — Opted-In Promo:** If `promotion_or_offer` AND user allows promotions -> `digest` / `promotion`.
+9. **Gate 7 — Default Fallback:** Everything else -> `digest` with appropriate `message_type`.
 
 ---
 
@@ -143,6 +153,7 @@ Confidence is assigned deterministically from `config.yaml` thresholds per gate:
 | **Absolute Gate (Scam / Promo Opt-out / Emergency)** | `0.95` | Complete rule certainty. |
 | **Actionable High-Priority** | `0.90` | Clear semantic rule with user profile data. |
 | **DND Digest / Default** | `0.85` / `0.70` | Standard routing without strong signal. |
+| **Low Engagement Demotion** | `0.80` | Personalization signal — user ignores this source. |
 | **Media Extraction Failure** | `Score - 0.15` | Penalty applied if audio/image extraction failed. |
 | **Safe-Default Fallback** | `0.50` | No LLM classification available. |
 

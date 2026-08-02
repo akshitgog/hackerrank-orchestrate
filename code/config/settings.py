@@ -58,6 +58,11 @@ class PathConfig(BaseModel):
     cache_dir: str
 
 
+class PersonalizationConfig(BaseModel):
+    """Engagement-based personalization thresholds."""
+    low_engagement_threshold: float = 0.25
+
+
 class ConfidenceConfig(BaseModel):
     """Deterministic confidence thresholds per gate."""
     gate_scam: float
@@ -65,6 +70,7 @@ class ConfidenceConfig(BaseModel):
     gate_emergency: float
     gate_actionable: float
     gate_dnd_digest: float
+    gate_low_engagement: float = 0.80
     default: float
     media_failure_penalty: float
     fallback_default: float
@@ -76,6 +82,7 @@ class AppConfig(BaseModel):
     execution: ExecutionConfig
     media: MediaConfig
     paths: PathConfig
+    personalization: PersonalizationConfig = PersonalizationConfig()
     confidence: ConfidenceConfig
 
 
