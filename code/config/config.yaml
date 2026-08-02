@@ -9,7 +9,7 @@ models:
   #
   # Active configuration (auto-overridden by settings.py if other API keys are present in .env):
   llm_model: "bedrock/amazon.nova-micro-v1:0"    # Text semantic classification (cheapest text model)
-  vlm_model: "bedrock/amazon.nova-2-lite-v1:0"                         # Image OCR / poster inspection
+  vlm_model: "bedrock/amazon.nova-lite-v1:0"                         # Image OCR / poster inspection
   stt_model: "deepgram/nova-3"                   # Voice note transcription (fast multilingual STT)
 
 execution:
@@ -22,11 +22,11 @@ execution:
 media:
   # It is the user's responsibility to update this resolution based on their chosen VLM's constraints (e.g., 1024, 1120).
   image_long_edge_px: 1120
-  enable_zoom_inspection: true
 
 paths:
   dataset_dir: "dataset"
-  output_file: "dataset/output.csv"
+  messages_file: "sample_messages.csv"
+  output_file: "code/evaluation/output.csv"
   cache_dir: "code/.cache"
 
 confidence:

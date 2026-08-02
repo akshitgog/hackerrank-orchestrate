@@ -48,12 +48,12 @@ class ExecutionConfig(BaseModel):
 class MediaConfig(BaseModel):
     """Image/audio preprocessing parameters."""
     image_long_edge_px: int
-    enable_zoom_inspection: bool
 
 
 class PathConfig(BaseModel):
-    """File system paths (relative to project root)."""
+    """File paths for inputs/outputs."""
     dataset_dir: str
+    messages_file: str = "messages.csv"
     output_file: str
     cache_dir: str
 

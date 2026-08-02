@@ -243,7 +243,7 @@ async def run_pipeline(config_path: str | None = None) -> None:
 
     # ── 2. Load dataset (DatasetContext) ──
     dataset_dir = str(PROJECT_ROOT / config.paths.dataset_dir)
-    ctx = load_all_data(dataset_dir)
+    ctx = load_all_data(dataset_dir, config.paths.messages_file)
     logger.info(f"Dataset loaded: {len(ctx.messages)} messages, {len(ctx.users)} users, {len(ctx.message_history)} history rows")
 
     # ── 3. Initialize LLM adapter with cache ──

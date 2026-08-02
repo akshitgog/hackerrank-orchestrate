@@ -77,6 +77,7 @@ async def extract_image(message: dict, images_index: dict, config, llm_adapter) 
         conversation_type = message.get("conversation_type", "unknown")
         
         system_prompt, user_prompt = build_vlm_prompt(sender_type, conversation_type)
+        logger.info(f"Sending image {image_id} to VLM model ({config.models.vlm_model})...")
         vlm_result = await llm_adapter.analyze_image(
             image_base64=img_b64,
             prompt=user_prompt,
@@ -155,6 +156,7 @@ async def extract_audio(voice_note_id: str, voice_notes_index: dict, config, llm
             return MediaExtraction(transcribed_text="", media_status="extraction_failed", media_type="voice")
 
         # ── Call STT for transcription ──
+        logger.info(f"Sending voice note {voice_note_id} to STT model ({config.models.stt_model})...")
         transcribed = await llm_adapter.transcribe_audio(
             audio_bytes=audio_bytes,
             model=config.models.stt_model,

@@ -42,7 +42,7 @@ def _load_csv_list(filepath: str) -> List[dict]:
         reader = csv.DictReader(f)
         return list(reader)
 
-def load_all_data(dataset_dir: str) -> DatasetContext:
+def load_all_data(dataset_dir: str, messages_filename: str = "messages.csv") -> DatasetContext:
     ctx = DatasetContext()
     
     ctx.users = _load_csv_dict(os.path.join(dataset_dir, "users.csv"), "user_id")
@@ -53,10 +53,10 @@ def load_all_data(dataset_dir: str) -> DatasetContext:
     ctx.message_history = _load_csv_dict(os.path.join(dataset_dir, "message_history.csv"), "message_id")
     ctx.message_events = _load_csv_dict(os.path.join(dataset_dir, "message_events.csv"), "message_id")
     
-    messages_path = os.path.join(dataset_dir, "messages.csv")
+    messages_path = os.path.join(dataset_dir, messages_filename)
     ctx.messages = _load_csv_list(messages_path)
     
-    if len(ctx.messages) != 110:
+    if messages_filename == "messages.csv" and len(ctx.messages) != 110:
         print(f"CRITICAL ERROR: messages.csv must have exactly 110 rows, found {len(ctx.messages)}", file=sys.stderr)
         sys.exit(1)
         
