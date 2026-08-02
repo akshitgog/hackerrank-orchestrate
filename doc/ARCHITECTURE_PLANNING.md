@@ -51,6 +51,8 @@ The pipeline uses a two-stage LLM flow:
 
 No numeric scores, no confidence floats, and no `action` enums are output by the LLM.
 
+**Key constraint in `msg_router.yaml`:** The router prompt explicitly instructs the LLM to never assign `risk_label=high` or `risk_label=critical` to `urgent_operational` or `event` messages unless credentials are explicitly requested. This prevents false-positive scam/spam muting of legitimate work alerts that happen to use urgent language.
+
 ---
 
 ## 4. Execution Pipeline (Asyncio)
@@ -62,6 +64,7 @@ No numeric scores, no confidence floats, and no `action` enums are output by the
 4. For each incoming message M (executed concurrently via asyncio.gather with Semaphore):
    a. CONTEXT PHASE (Python):
       - Pre-fetch user_profile, group_membership, business_relationship
+      - Compute source_engagement ratios (global, business, group)
       - Query message_history for sender/group/business history (top 3-5 rows)
    b. MEDIA PHASE (Asyncio):
       - If media_type == "voice" -> await async STT on media/audio/*.mp3
@@ -74,7 +77,7 @@ No numeric scores, no confidence floats, and no `action` enums are output by the
       - Send signal JSON + history + interaction data to msg_router prompt
       - Parse response via Pydantic SensorObservation model
    e. DETERMINISTIC DECISION TREE (Python):
-      - Apply 7 gates in strict priority order
+      - Apply 8 gates in strict priority order (including engagement personalization)
    f. CONFIDENCE CALIBRATION (Python):
       - Assign deterministic confidence from config thresholds per gate
 5. Sort processed results by row_index (preserves input order)
@@ -126,12 +129,18 @@ When evaluating message `M` for `user_id`, Python retrieves historical context:
 To prevent the **Dilution Problem** (where crucial actionable messages get downgraded by low historical averages), Python evaluates a deterministic hierarchy of rules:
 
 ### 6.1 Absolute Safety & Consent Gates (Short-Circuit Rules)
-1. **Gate 1 — Scam / Phishing:** If `risk_label` in `[high, critical]` OR `content_intent` in `[credential_or_otp_request, account_threat, prompt_injection]` OR unverified domain mismatch -> `mute` / `scam`.
+1. **Gate 1 — Scam / Phishing (Split):**
+   - If `risk_label == critical` -> `mute` / `scam`
+   - If `risk_label == high` AND intent is phishing (`credential_or_otp_request`, `account_threat`, `prompt_injection`) -> `mute` / `scam`
+   - If `risk_label == high` AND intent is NOT phishing -> `mute` / `spam` (suspicious but not fraud)
+   - If `content_intent` in `[credential_or_otp_request, account_threat, prompt_injection]` (any risk) -> `mute` / `scam`
+   - If `contains_sensitive_request` from unverified source -> `mute` / `scam`
+   - If unverified domain mismatch -> `mute` / `scam`
 2. **Gate 2 — Promotional Consent:** If `content_intent == promotion_or_offer` AND user opted out of promotions -> `mute` / `promotion`.
 3. **Gate 3 — Emergency Override:** If `priority_label == critical` AND `risk_label` in `[none, low]` -> `notify` / `urgent`. Overrides DND and muted groups.
 
 ### 6.2 Sender Fatigue, Engagement & Actionable Rules
-4. **Gate 3.5 — Sender Fatigue:** If low-value intent AND high dismiss rate or zero opens from sender -> `mute` / `spam`.
+4. **Gate 3.5 — Sender Fatigue:** If low-value intent (`chain_forward`, `greeting_or_blessing`, `promotion_or_offer`) AND sender dismiss rate >= 50% or zero opens -> `mute` with intent-mapped type (forward/greeting/promotion).
 5. **Gate 3.7 — Low Engagement Demotion:** If `source_engagement < low_engagement_threshold` (default 0.25) AND priority is NOT critical/high -> `digest`. Personalizes routing based on whether the user actually engages with this source.
 6. **Gate 4 — Actionable High-Priority:** If `priority_label == high` AND (`is_actionable` OR sender is admin) -> `notify`.
 
@@ -200,7 +209,7 @@ code/
 │   ├── context/
 │   │   ├── load_dataset.py        # DatasetContext: indexes all CSV files
 │   │   ├── message_history.py     # On-demand sender/business/group history lookups
-│   │   └── user_profiles.py       # DND, fatigue, group membership, business opt-out
+│   │   └── user_profiles.py       # DND, fatigue, group membership, engagement ratios
 │   ├── classifiers/
 │   │   ├── schema_models.py       # Pydantic v2 typed seam: SensorObservation, MediaExtraction
 │   │   ├── response_cache.py      # SHA-256 file-based API response cache
@@ -208,7 +217,7 @@ code/
 │   │   ├── media_extractor.py     # Pillow image preprocessing + VLM/STT extraction
 │   │   └── prompt_loader.py       # YAML prompt template loader
 │   ├── routing_engine/
-│   │   ├── decision_tree.py       # 7-Gate deterministic decision tree
+│   │   ├── decision_tree.py       # 8-Gate deterministic decision tree (with engagement)
 │   │   ├── confidence_calibrator.py  # Config-driven confidence assignment
 │   │   └── safe_fallback.py       # Universal safe-default row & regex heuristic
 │   └── output_validator/

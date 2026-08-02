@@ -25,7 +25,7 @@ media:
 
 paths:
   dataset_dir: "dataset"
-  messages_file: "sample_messages.csv"
+  messages_file: "messages.csv"
   output_file: "code/evaluation/output.csv"
   cache_dir: "code/.cache"
 

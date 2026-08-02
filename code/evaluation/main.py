@@ -4,7 +4,7 @@ main.py — CLI Scorecard Runner for HackerRank Orchestrate Message Notification
 import os
 import sys
 import argparse
-from .evaluation import (
+from evaluation import (
     evaluate_completeness,
     verify_schema_vocabulary,
     compute_action_distribution,

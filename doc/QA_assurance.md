@@ -48,7 +48,9 @@ When modifying thresholds in `config.yaml` or rules in `decision_tree.py`:
 The pipeline handles adversarial inputs through multiple layers:
 * **Pydantic Typed Seam:** Rejects any LLM output with invalid enum values
 * **Prompt Instructions:** Models instructed to treat message content as untrusted data
-* **Decision Tree Gate 1:** Deterministically mutes prompt injection, credential phishing, and account threat intents
+* **LLM Risk Constraint:** Router prompt forbids high/critical risk on operational messages without credential signals
+* **Decision Tree Gate 1 (Split):** Deterministically mutes phishing intents as `scam`, non-phishing high-risk as `spam`
+* **Engagement Personalization (Gate 3.7):** Low-engagement sources demoted to digest — never upgrades safety
 * **Safe-Default Fallback:** Any unhandled exception emits a conservative `digest`/`unknown` row
 
 ---

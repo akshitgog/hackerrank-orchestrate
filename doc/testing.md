@@ -45,6 +45,7 @@ Benefits:
 2. Confidence is within `[0.0, 1.0]`
 3. High/critical risk always routes to `mute`
 4. Non-scam critical priority with low/no risk always routes to `notify`
+5. Low engagement source with non-urgent content never routes to `notify`
 
 ---
 
