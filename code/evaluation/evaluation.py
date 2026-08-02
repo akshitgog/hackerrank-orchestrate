@@ -82,7 +82,7 @@ def evaluate_safety_guardrails(messages_path: str, output_path: str) -> Dict[str
     scam_keywords = ["otp", "lottery", "verify password", "account blocked", "prize money"]
 
     for msg_id, msg in messages.items():
-        text = msg.get("text", "").lower()
+        text = msg.get("message_text", "").lower()
         out = outputs.get(msg_id, {})
         action = out.get("action", "")
 

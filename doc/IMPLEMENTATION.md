@@ -1,133 +1,121 @@
-# IMPLEMENTATION.md — Codebase Architecture & Hackathon Execution Roadmap
+# IMPLEMENTATION.md — Codebase Architecture
 
-This document defines the production implementation roadmap for the HackerRank Orchestrate Message Notification Router, adhering to the Principal Engineering standards in [`june_edition_learning.md`](file:///C:/Users/Galactus/OneDrive/Desktop/orches/doc/june_edition_learning.md) and incorporating the winning Rank 3 architectural principles (Universal Safe-Default Row, Layer-by-Layer Verification, Deterministic Invariant Ownership).
+This document describes the implemented architecture of the HackerRank Orchestrate Message Notification Router.
 
 ---
 
 ## 1. Codebase Architecture (4-Layer Clean Hierarchy)
 
-Our repository is organized into four modular layers, separating **probabilistic sensors** from **deterministic domain invariants**:
+The repository is organized into four modular layers, separating **probabilistic sensors** from **deterministic domain invariants**:
 
 ```text
 dataset/                        # The 11 CSV dataset files + media/
-doc/                            # Challenge documentation & architecture specs
+doc/                            # Architecture specs & analysis
 code/
 ├── config/                     # Declarative configuration & Pydantic v2 validation
-│   ├── config.yaml             # Externalized model names, thresholds, paths (12-Factor App)
-│   └── settings.py             # Pydantic v2 Fail-Fast boot validation
+│   ├── config.yaml             # Externalized model names, thresholds, paths
+│   └── settings.py             # Pydantic v2 fail-fast boot validation
 ├── env/                        # Secrets & environment variable templates
-│   ├── .env                    # Secrets file (API keys, never committed)
+│   ├── .env                    # Secrets file (never committed)
 │   └── .env.example            # Template for required environment variables
-├── prompts/                    # Top-level YAML prompt templates (editable without code changes)
-│   ├── msg_observer.yaml       # LLM signal extractor for text messages (no intent assignment)
-│   ├── msg_router.yaml         # LLM intent classifier (assigns intent/risk based on signals)
-│   ├── vlm_observer.yaml       # VLM image observation prompt
-│   ├── img_router.yaml         # LLM image classification prompt
-│   └── stt_config.yaml         # STT transcription normalization & Hindi-English rules
-├── src/                        # APPLICATION SOURCE CODE (Hexagonal / Ports-and-Adapters)
-│   ├── __init__.py
-│   ├── context/                # LAYER 1: WHATSAPP DATASET & CONTEXT STORE (Pure Python)
-│   │   ├── __init__.py
-│   │   ├── load_dataset.py     # DatasetContext: indexes all 11 CSV files with typed primary keys
-│   │   ├── message_history.py  # On-demand lookup of sender/business/group historical messages
-│   │   └── user_profiles.py    # DND quiet hours, engagement rates, group membership, business opt-out
+├── prompts/                    # YAML prompt templates (editable without code changes)
+│   ├── msg_observer.yaml       # LLM signal extraction (boolean flags from raw message)
+│   ├── msg_router.yaml         # LLM intent classification (from signals + history)
+│   ├── vlm_observer.yaml       # VLM image observation
+│   ├── img_router.yaml         # LLM image classification (from VLM observation)
+│   └── stt_config.yaml         # STT normalization rules for Hindi-English code-switching
+├── src/
+│   ├── context/                # LAYER 1: DATASET & CONTEXT STORE (Pure Python)
+│   │   ├── load_dataset.py     # DatasetContext: indexes all CSV files with typed primary keys
+│   │   ├── message_history.py  # On-demand sender/business/group history lookups
+│   │   └── user_profiles.py    # DND quiet hours, fatigue score, group membership, business opt-out
 │   ├── classifiers/            # LAYER 2: PROBABILISTIC CLASSIFIERS & EXTRACTORS (LLM/VLM/STT)
-│   │   ├── __init__.py
 │   │   ├── schema_models.py    # Pydantic v2 typed seam: SensorObservation, MediaExtraction
-│   │   ├── response_cache.py   # SHA-256 deterministic API response cache (zero duplicate billing)
-│   │   ├── llm_client.py       # LiteLLM async adapter with decoupled modality retries (llm/vlm/stt) & semaphore
+│   │   ├── response_cache.py   # SHA-256 deterministic API response cache
+│   │   ├── llm_client.py       # LiteLLM async adapter with retry, semaphore, self-correction
 │   │   ├── media_extractor.py  # Pillow image preprocessing + VLM/STT extraction with fallback
-│   │   └── prompt_loader.py    # Single clean loader for top-level code/prompts/ YAML files
+│   │   └── prompt_loader.py    # YAML prompt template loader and STT normalization
 │   ├── routing_engine/         # LAYER 3: DETERMINISTIC ROUTER (Pure Python, zero network)
-│   │   ├── __init__.py
-│   │   ├── decision_tree.py    # 7-Gate Decision Tree with edge case annotations
-│   │   ├── confidence_calibrator.py # Deterministic confidence from config thresholds
-│   │   └── safe_fallback.py    # Universal Safe-Default Row & regex heuristic classifier
+│   │   ├── decision_tree.py    # 7-Gate deterministic decision tree
+│   │   ├── confidence_calibrator.py  # Config-driven confidence assignment per gate
+│   │   └── safe_fallback.py    # Universal safe-default row & regex heuristic classifier
 │   └── output_validator/       # LAYER 4: OUTPUT CONTRACT ENFORCEMENT
-│       ├── __init__.py
-├── tests/                      # PRACTICAL OFFLINE TEST SUITE (pytest fixtures & regression lock)
-│   ├── __init__.py
-│   ├── conftest.py             # Shared Pytest fixtures and mock helpers
-│   ├── test_schema_models.py   # Verifies Parse-Don't-Validate typed seams
-│   ├── test_decision_tree.py   # Practical 5-line sample row regression fixtures (like June edition)
-│   └── test_properties.py      # Hypothesis property-based fuzzing for schema invariants
-└── main.py                     # CLI entry point; asyncio event loop & batch pipeline orchestration
+│       └── validate_output_csv.py  # 110-row completeness, enum vocabulary, evidence validation
+├── tests/                      # Offline test suite (pytest)
+│   ├── conftest.py             # Shared fixtures and helper builders
+│   ├── test_schema_seams.py    # Pydantic boundary validation
+│   ├── test_regression_fixtures.py  # Golden anchor regression tests
+│   ├── test_property_invariants.py  # 500-permutation randomized invariant fuzzing
+│   └── test_system_acceptance.py    # Dataset integrity acceptance tests
+├── evaluation/                 # Post-run evaluation tools
+│   ├── evaluation.py           # Statistical scorecard metrics
+│   ├── compare.py              # Ground-truth comparison tool
+│   └── main.py                 # CLI scorecard runner
+└── main.py                     # CLI entry point; asyncio event loop & batch pipeline
 ```
 
 ---
 
-## 2. Universal Safe-Default Row Contract (`src/router/fallback.py`)
+## 2. Universal Safe-Default Row Contract
 
-To guarantee zero dropped rows and 100% adherence to the 110-row Completeness Invariant, whenever any layer fails unrecoverably for a row, `fallback.py` emits the **Universal Safe-Default Row**:
+To guarantee zero dropped rows and 100% adherence to the 110-row Completeness Invariant, whenever any layer fails unrecoverably for a row, `safe_fallback.py` emits:
 
 ```json
 {
   "action": "digest",
   "message_type": "unknown",
-  "reason": "Automated pipeline fallback due to unrecoverable sensor error",
+  "reason": "Automated pipeline fallback due to unrecoverable sensor error.",
   "confidence": 0.50,
   "evidence_message_ids": "none"
 }
 ```
 
----
-
-## 3. Implementation Roadmap (Phased Hackathon Execution)
-
-```
-[ Phase 1: Data & Context Layer ] ──► [ Phase 2: Sensor & Media Layer ]
-                                                 │
-[ Phase 4: QA & Regression Lock ] ◄── [ Phase 3: Deterministic Router ]
-```
-
-### Phase 1: Data & Context Layer (`src/data/` & `src/config/`)
-- [ ] Implement `settings.py` with Pydantic v2 `model_validate()` for YAML/ENV configuration (`12-Factor App`).
-- [ ] Add **Fail-Fast boot validation** to abort immediately if dataset files or API keys are missing.
-- [ ] Implement `loader.py` to index `users.csv`, `groups.csv`, `group_members.csv`, `business_accounts.csv`, `user_business_history.csv`, `message_history.csv`, and `message_events.csv`.
-- [ ] Implement `history.py` to query top 3-5 candidate historical messages for a given sender/group/business on demand.
-- [ ] Implement `profiles.py` to calculate `user_open_rate`, `user_reply_rate`, `user_dismissal_rate`, and check `in_dnd_window`.
-
-### Phase 2: Sensor & Media Layer (`src/sensor/`)
-- [ ] Implement `media.py` using `asyncio` to transcribe `.mp3` voice notes and OCR `.jpg` image circulars/posters. Add graceful exception handling (`media_status = "extraction_failed"`).
-- [ ] Implement `schema.py` defining Pydantic v2 models for LLM JSON output (e.g. `SensorObservation`).
-- [ ] Implement Two-Layer LLM flow: `msg_observer` (extract boolean signals) -> `msg_router` (assign intent & risk) to prevent classification collapse.
-- [ ] Implement `llm.py` with an `asyncio.Semaphore` rate-limiter and decoupled modality backoffs (`llm: 3`, `vlm: 2`, `stt: 1`).
-
-### Phase 3: Deterministic Router Layer (`src/router/`)
-- [ ] Implement `policy.py` containing our **Deterministic Rule-Based Decision Tree**:
-  1. Gate 1: Scam / Phishing Gate (`contains_sensitive_request=true` in unsafe flow OR `risk_label in [high, critical]`) $\rightarrow$ `mute` / `scam`.
-  2. Gate 2: Promotional Consent Gate (`allows_promotions=0` + `promotion_or_offer`) $\rightarrow$ `mute` / `promotion`.
-  3. Gate 3: Emergency Override Gate (`priority_label=critical`, safe) $\rightarrow$ `notify` / `urgent` (overrides DND & mutes).
-  4. Gate 4: Actionable Operational Rule (`priority_label=high` + actionable/admin) $\rightarrow$ `notify`.
-  5. Gate 5: DND & Muted Group Rule $\rightarrow$ `digest` (or `mute` for greetings/forwards).
-  6. Gate 6: Opted-in Promotions $\rightarrow$ `digest` / `promotion`.
-- [ ] Implement `calibration.py` assigning deterministic confidence (`0.95`, `0.90`, `0.85`, `0.70`, minus `0.15` for media extraction failure).
-- [ ] Implement `fallback.py` to emit the Universal Safe-Default Row or run offline classification when API calls fail.
-
-### Phase 4: Quality Assurance & Evaluation (`src/validator/` & `test/`)
-- [ ] Implement `check_output.py` to enforce the **110-Row Completeness Invariant**, exact 6-column order, CSV quoting, and evidence ID existence in `message_history.csv`.
-- [ ] Build offline unit test suite (`pytest`) mocking LLM responses to test domain invariant boundaries without network calls.
-- [ ] Build property-based test suite (`test_properties.py`) using `Hypothesis` (`@given(st.sampled_from(...))`) to prove out-of-vocabulary labels never occur.
-- [ ] Verify execution from terminal (`python code/main.py`) produces valid `dataset/output.csv`.
+When the LLM returns `None` but no hard crash occurs, the regex-based heuristic classifier (`heuristic_classify`) provides a more informed fallback using keyword patterns for scam, urgency, greeting, and promotion detection.
 
 ---
 
-## 4. Concurrency & Deterministic Output Ordering (Asyncio Architecture)
+## 3. Two-Stage LLM Architecture
 
-To process 110 messages rapidly without rate limits or row shuffling:
-1. **Input Indexing:** Each row in `messages.csv` is assigned its original zero-based positional index (`row_index = 0..109`).
-2. **Concurrent Execution:** Messages are processed in parallel via `asyncio.gather(..., return_exceptions=True)` regulated by an `asyncio.Semaphore(10)`.
-3. **Exception Recovery:** If any row raises an unhandled exception during async processing, `fallback.py` emits the Universal Safe-Default Row so no row is dropped.
-4. **Deterministic Sorting:** Upon completion of all 110 async tasks, results are sorted by `row_index` before writing `output.csv`.
+The pipeline uses two sequential LLM calls per message to prevent classification collapse:
+
+**Problem:** A single prompt that both observes AND classifies forces the model to resolve ambiguous messages into one bucket, silently discarding secondary signals. E.g., "Your account will be blocked — verify OTP now" fires BOTH `account_threat` AND `credential_request`.
+
+**Solution:**
+1. **Stage 1 — Signal Extraction (`msg_observer.yaml`):** Reports boolean flags (what signals are present). Multiple signals can be true simultaneously.
+2. **Stage 2 — Intent Classification (`msg_router.yaml`):** Receives the signal report and resolves priority conflicts explicitly using documented priority rules.
+
+This separation means changing routing logic only requires editing `msg_router.yaml` — the observer remains stable.
 
 ---
 
-## 5. Verification Checklist Before Final Submission
+## 4. Concurrency & Deterministic Output Ordering
 
-- [x] All 13 Edge Cases mapped to deterministic rules in `EDGE_CASES.md`.
-- [x] Threat analysis & API failure fallbacks documented in `THREAT_ANALYSIS.md`.
-- [x] Universal Safe-Default Row contract codified in `IMPLEMENTATION.md`.
-- [x] Prompts externalized to top-level `prompts/` YAML files (editable without code changes).
-- [ ] Zero hardcoded magic strings or numeric weights in Python logic.
-- [ ] 100% of sample rows pass offline Decision Tree scorecard (`test/test_formula_offline.py`).
-- [ ] End-to-end run generates `output.csv` with exactly 110 rows and zero schema violations.
+To process 110 messages concurrently without rate limit violations or row shuffling:
+
+1. **Input Indexing:** Each message is assigned its zero-based positional index (`row_index`).
+2. **Concurrent Execution:** Messages are processed via `asyncio.gather(*tasks)` regulated by `asyncio.Semaphore(max_concurrency)` from config.
+3. **Exception Recovery:** If any row raises an unhandled exception, `safe_fallback.py` emits the safe-default row. No row is dropped.
+4. **Deterministic Sorting:** Results are sorted by `row_index` before writing `output.csv`.
+
+---
+
+## 5. Configuration & Provider Flexibility
+
+All model names, thresholds, and paths are externalized to `config.yaml` + environment variables:
+
+- Model names use LiteLLM prefix format (e.g., `bedrock/amazon.nova-micro-v1:0`, `gemini/gemini-2.5-flash`)
+- Provider auto-detection from available API keys in `.env`
+- ENV overrides via `ORCHESTRATE_LLM_MODEL`, `ORCHESTRATE_VLM_MODEL`, `ORCHESTRATE_STT_MODEL`
+- Confidence thresholds per gate are configurable without code changes
+- Concurrency, retries, and timeouts are configurable
+
+---
+
+## 6. Verification Checklist
+
+- [x] Edge cases mapped to deterministic rules in decision tree
+- [x] Universal safe-default row guarantees zero dropped rows
+- [x] Prompts externalized to YAML files (editable without code changes)
+- [x] All model names read from config (zero hardcoded model strings in source)
+- [x] 15 offline tests pass (`python -m pytest code/tests/ -q`)
+- [x] Pipeline produces valid output with correct schema

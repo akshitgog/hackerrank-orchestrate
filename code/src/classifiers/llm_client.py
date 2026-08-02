@@ -221,6 +221,7 @@ class LLMAdapter:
         self,
         image_base64: str,
         prompt: str,
+        system_prompt: Optional[str] = None,
         model: Optional[str] = None,
     ) -> Optional[dict]:
         """
@@ -240,7 +241,10 @@ class LLMAdapter:
             return cached
 
         # ── LiteLLM multimodal call ──
-        messages = [
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append(
             {
                 "role": "user",
                 "content": [
@@ -248,7 +252,7 @@ class LLMAdapter:
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}},
                 ],
             }
-        ]
+        )
 
         try:
             response = await self._acompletion_with_retry(

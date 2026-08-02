@@ -81,6 +81,7 @@ async def extract_image(message: dict, images_index: dict, config, llm_adapter) 
         vlm_result = await llm_adapter.analyze_image(
             image_base64=img_b64,
             prompt=user_prompt,
+            system_prompt=system_prompt,
             model=config.models.vlm_model,
         )
 

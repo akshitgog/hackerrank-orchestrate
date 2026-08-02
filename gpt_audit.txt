@@ -1,0 +1,267 @@
+ Repository Audit
+  Evidence base: source files, prompts, config, tests, current CSV outputs, and local commands. I ran python -m pytest code\tests -q: 15 passed; python
+  code\main.py --help: works; python code\evaluation\main.py ...: fails as a direct script due relative import; python -m evaluation.main ... from code\:
+  runs but reports safety as 0/0.
+
+  Phase 0 - Problem Understanding
+  Problem statement: build an AI-powered WhatsApp batch router deciding notify, digest, or mute per incoming message. Evidence: problem_statement.md:3,
+  problem_statement.md:15, problem_statement.md:17.
+
+  Functional requirements: one prediction row per dataset/messages.csv row; output columns
+  message_id,action,message_type,reason,confidence,evidence_message_ids; allowed actions and 11 message types; use message, user, group, business, media,
+  and history context. Evidence: problem_statement.md:21, problem_statement.md:65, problem_statement.md:90.
+
+  Non-functional requirements: terminal runnable, read from dataset/, produce valid output.csv, no organizer-only files or hardcoded labels, secrets from
+  environment. Evidence: README.md:77, README.md:85.
+
+  Success criteria: hidden-label comparison on action, message type, reason, evidence IDs, confidence calibration. Evidence: problem_statement.md:120.
+
+  Phase 1 - Claim Verification
+
+   Claim                                      Verdict    Evidence
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AI-powered                        Partially Proven    LiteLLM calls exist in code/src/classifiers/llm_client.py:63, code/src/classifiers/
+                                                         llm_client.py:294. Live success not proven.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Multimodal                        Partially Proven    Image/VLM path in code/src/classifiers/media_extractor.py:27; voice/STT path in code/src/
+                                                         classifiers/media_extractor.py:125.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Personalized routing              Partially Proven    Uses user/group/business/history context in code/main.py:65, code/main.py:70. Full-context
+                                                         relevance not proven.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Orchestration                           Misleading    Actual flow is fixed sequence plus async batching, not dynamic orchestration. Evidence: code/
+                                                         main.py:137, code/main.py:150, code/main.py:197.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Dynamic routing/planning           Not Implemented    Routing is hardcoded gates in code/src/routing_engine/decision_tree.py:92. No planner/replanner
+                                                         code found.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Multi-model hot swap              Partially Proven    Config/env model selection exists in code/config/settings.py:137; hardcoded fallback model strings
+                                                         exist in code/config/settings.py:119.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Production-grade                False / Not Proven    No CI, package metadata, Dockerfile, health checks, metrics, tracing, or deployment files found;
+                                                         default config targets sample output. Evidence: code/config/config.yaml:28.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Fail-fast API key validation                 False    Missing API key only warns, does not exit. Evidence: code/config/settings.py:164.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Hypothesis property testing                  False    hypothesis is a dependency, but test uses random.seed and a loop, not @given. Evidence: code/
+                                                         tests/test_property_invariants.py:2, code/tests/test_property_invariants.py:18.
+  ──────────────────────────────  ────────────────────  ────────────────────────────────────────────────────────────────────────────────────────────────────
+   Caching/retry                               Proven    Cache in code/src/classifiers/response_cache.py:12; retry/backoff in code/src/classifiers/
+                                                         llm_client.py:56.
+
+  Phase 2 - Architecture Extraction
+  Entry points: python code/main.py via code/main.py:317; evaluation module via code/evaluation/main.py:63; pytest tests in code/tests.
+
+  Actual lifecycle: load config, load CSVs, create cache and LLM adapter, process messages under semaphore, sort by row_index, validate, write CSV.
+  Evidence: code/main.py:258, code/main.py:270, code/main.py:279, code/main.py:286, code/main.py:300, code/main.py:309.
+
+  sequenceDiagram
+    participant CLI as code/main.py
+    participant Config as config/settings.py
+    participant Data as context/load_dataset.py
+    participant Media as media_extractor.py
+    participant LLM as llm_client.py
+    participant Router as decision_tree.py
+    participant Validator as validate_output_csv.py
+    CLI->>Config: load_config(config.yaml)
+    CLI->>Data: load_all_data(dataset_dir, messages_file)
+    loop each message under asyncio.Semaphore
+      CLI->>Media: extract_image/extract_audio if media
+      Media->>LLM: VLM/STT calls
+      CLI->>LLM: extract_message_signals
+      CLI->>LLM: classify_message
+      CLI->>Router: route_message
+    end
+    CLI->>Validator: validate_output
+    CLI->>CLI: write configured output CSV
+
+  Phase 3 - Architecture Validation
+  Partially satisfies the documented problem. The repository contains a structurally valid dataset/output.csv with 110 rows and exact columns, verified by
+  CSV inspection, but the default executable config reads sample_messages.csv and writes code/evaluation/output.csv, not the required full dataset output.
+  Evidence: code/config/config.yaml:28, code/config/config.yaml:29.
+
+  Architecture mismatches: docs claim chronological sorting by created_at; code enumerates loaded order and sorts only by row_index. Evidence: doc/
+  ARCHITECTURE_PLANNING.md:8, code/main.py:285, code/main.py:289. Docs claim asyncio.gather(..., return_exceptions=True); code uses asyncio.gather(*tasks).
+  Evidence: doc/IMPLEMENTATION.md:119, code/main.py:286.
+
+  Dead or leaky abstraction: build_vlm_prompt returns a system prompt, but extract_image passes only user_prompt to analyze_image, and analyze_image sends
+  only a user message. Evidence: code/src/classifiers/media_extractor.py:79, code/src/classifiers/llm_client.py:243.
+
+  Phase 4 - AI & Orchestration Audit
+  Verdict: static async prompt pipeline plus deterministic rule router. It is not dynamic agent orchestration.
+
+  Proven: async concurrency via semaphore and gather in code/main.py:279; retries in code/src/classifiers/llm_client.py:56; fallback in code/src/
+  routing_engine/decision_tree.py:63.
+
+  Not Proven / Not Implemented: planner, task decomposition, dynamic tool selection, scheduling, state machine, memory, reflection, critique, replanning,
+  checkpointing, cancellation, dynamic execution graph, fallback models, model routing by task. No executable code evidence found.
+
+  Phase 5 - Prompt Engineering Audit
+  Prompts are hardcoded YAML templates: code/prompts/msg_observer.yaml:13, code/prompts/msg_router.yaml:10, code/prompts/vlm_observer.yaml:7, code/prompts/
+  img_router.yaml:7. Prompt interpolation uses Python .format() with raw message/context JSON. Evidence: code/src/classifiers/prompt_loader.py:59, code/src/
+  classifiers/prompt_loader.py:88.
+
+  Prompt injection protection exists as prompt instructions and a router gate. Evidence: code/prompts/msg_observer.yaml:106, code/src/routing_engine/
+  decision_tree.py:94. Deterministic sanitization is Not Proven.
+
+  STT config has hindi_fixes, preserve_keywords, and context_instruction, but code only applies normalization_rules.replacements. Evidence: code/prompts/
+  stt_config.yaml:19, code/src/classifiers/prompt_loader.py:150.
+
+  Phase 6 - Decision Logic Audit
+  Actual decision tree:
+
+  1. sensor_obs is None -> heuristic fallback. code/src/routing_engine/decision_tree.py:63
+  2. high/critical risk or scam intents -> mute/scam. code/src/routing_engine/decision_tree.py:92
+  3. unverified domain mismatch -> mute/scam. code/src/routing_engine/decision_tree.py:99
+  4. promo opt-out -> mute/promotion. code/src/routing_engine/decision_tree.py:110
+  5. critical safe priority -> notify/urgent. code/src/routing_engine/decision_tree.py:117
+  6. ignored low-value sender patterns -> mute. code/src/routing_engine/decision_tree.py:127
+  7. high/actionable/admin or verified business -> notify. code/src/routing_engine/decision_tree.py:136
+  8. muted group, forwards, DND, opted-in promos, default digest. code/src/routing_engine/decision_tree.py:159
+
+  Deterministic: yes, given sensor_obs. Configurable: only confidence and concurrency/model/path settings are externalized; rule gates and thresholds like >
+  3, >= 0.5, and intent labels are hardcoded. Evidence: code/src/routing_engine/decision_tree.py:128, code/src/routing_engine/decision_tree.py:164.
+
+  Phase 7 - Software Engineering Audit
+  Scores are audit judgments from repository evidence.
+
+   Category                Score    Evidence
+  ━━━━━━━━━━━━━━━━━━━━━━  ━━━━━━━  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Architecture            2.5/5    Clear modules, but default target mismatch and doc/code drift.
+  ──────────────────────  ───────  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Modularity                3/5    Separate context/classifier/router/validator folders. doc/IMPLEMENTATION.md:27
+  ──────────────────────  ───────  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Dependency injection      2/5    process_single_message accepts llm_adapter/config, but sys.path mutation and global prompt caches exist. code/
+                                    main.py:25, code/src/classifiers/prompt_loader.py:24
+  ──────────────────────  ───────  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Error handling            3/5    Per-row catch exists; validation only warns, does not fail output. code/main.py:224, code/main.py:301
+  ──────────────────────  ───────  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Configuration           2.5/5    Pydantic config exists; model fallbacks and sample output defaults are hardcoded.
+  ──────────────────────  ───────  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Logging                   2/5    Basic logging only. code/main.py:42
+  ──────────────────────  ───────  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   Packaging                 1/5    No pyproject.toml, setup.py, root requirements, Dockerfile found.
+  ──────────────────────  ───────  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   CI/CD                     0/5    No .github/workflows found; CI claim Not Proven.
+
+  Phase 8 - Production Readiness
+  Partially implemented: logging, config, retries, timeouts, cache, semaphore-based concurrency. Evidence: code/main.py:42, code/src/classifiers/
+  llm_client.py:50, code/src/classifiers/llm_client.py:63, code/src/classifiers/response_cache.py:26.
+
+  Not Proven: metrics, tracing, monitoring, health checks, feature flags, circuit breaker, rate-limit token bucket, graceful shutdown, backpressure,
+  deployment, horizontal scaling, containerization, cloud readiness.
+
+  Phase 9 - Security Review
+  Secrets: .env is gitignored and untracked; .env.example documents env vars. Evidence: .gitignore:1, code/config/settings.py:24, code/env/.env.example:10.
+  I did not read code/env/.env.
+
+  Prompt injection: partially handled by prompt instructions and router gate; no deterministic pre-filter test found. Evidence: code/prompts/
+  msg_observer.yaml:95, code/src/routing_engine/decision_tree.py:94.
+
+  Path traversal risk: media file_path from CSV is joined directly with dataset_dir without normalization or containment check. Evidence: code/src/
+  classifiers/media_extractor.py:51, code/src/classifiers/media_extractor.py:55.
+
+  Plaintext cache risk: model outputs and transcriptions are written as JSON files without encryption or redaction. Evidence: code/src/classifiers/
+  response_cache.py:30, code/src/classifiers/llm_client.py:300.
+
+  AuthN/AuthZ, SQL injection, SSRF, XSS, CSRF: Not Proven / not applicable to a local CLI batch program; no web server or database code found.
+
+  Phase 10 - Threat Model
+  Attack surface supported by implementation: CSV rows, media file paths, image/audio bytes, prompt templates, external LLM/VLM/STT APIs, .env credentials,
+  local cache, output CSV. Evidence: code/src/context/load_dataset.py:45, code/src/classifiers/media_extractor.py:27, code/src/classifiers/llm_client.py:63.
+
+  Trust boundaries: dataset/media -> prompt builder; LLM output -> Pydantic model; output rows -> validator; environment -> provider calls. Evidence: code/
+  src/classifiers/prompt_loader.py:59, code/src/classifiers/llm_client.py:117, code/src/output_validator/validate_output_csv.py:19.
+
+  Phase 11 - Adversarial Review
+  Breakpoints supported by evidence:
+
+  - Safety evaluator false confidence: it reads msg.get("text", ""), but schema uses message_text; observed result was 0/0 emergencies/scams. Evidence:
+    code/evaluation/evaluation.py:85, problem_statement.md:58.
+
+  - Evidence IDs are checked for existence only, not recipient ownership, despite docs claiming recipient validation. Evidence: code/main.py:217, doc/
+    ARCHITECTURE_PLANNING.md:106.
+
+  - Image observer system prompt is unused. Evidence above.
+  - Full pipeline run may hit sample target by default. Evidence: code/config/config.yaml:28.
+
+  Unsupported edge cases: cancellation, memory pressure handling, model partial-stream recovery, external service outage simulation, adversarial media
+  tests. Not Proven.
+
+  Phase 12 - Edge Case Audit
+
+   Edge case                              Status    Evidence
+  ━━━━━━━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Missing config                        Handled    exits on missing YAML. code/config/settings.py:97
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Missing API key             Partially handled    warning only. code/config/settings.py:164
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Missing CSV context         Partially handled    warns and returns empty dict/list. code/src/context/load_dataset.py:21
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Invalid LLM JSON            Partially handled    one correction retry, then None. code/src/classifiers/llm_client.py:123
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Media missing/corrupt       Partially handled    file_missing/extraction_failed. code/src/classifiers/media_extractor.py:45
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Duplicate output IDs     Handled by validator    code/src/output_validator/validate_output_csv.py:43
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Large audio                         Unhandled    reads whole file into memory. code/src/classifiers/media_extractor.py:152
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Cancellation                       Not Proven    no cancellation handling found.
+  ───────────────────────  ──────────────────────  ────────────────────────────────────────────────────────────────────────────
+   Network failure             Partially handled    retry then None/fallback path. code/src/classifiers/llm_client.py:56
+
+  Phase 13 - QA & Testing Audit
+  Proven tests: 15 passed locally. Tests cover schema seams, selected router gates, randomized valid enum permutations, and dataset row count. Evidence:
+  code/tests/test_schema_seams.py:7, code/tests/test_regression_fixtures.py:7, code/tests/test_property_invariants.py:18, code/tests/
+  test_system_acceptance.py:8.
+
+  Missing tests: full pipeline execution, LLM adapter mocked failures, media extraction, prompt loader, output validator, cache collisions, evaluation
+  scorecard correctness, path traversal, prompt injection fixtures, CI. Not Proven in code/tests.
+
+  Phase 14 - Performance Audit
+  Repeated computation: each message scans message_history for sender/business/group and sender events. Evidence: code/src/context/message_history.py:6,
+  code/src/context/message_history.py:34.
+
+  Duplicate API avoidance: cache exists. Evidence: code/src/classifiers/llm_client.py:86. Cache correctness risk: image hash uses only first 1000 base64
+  chars. Evidence: code/src/classifiers/llm_client.py:234.
+
+  Token/latency hotspots: two text LLM calls per message plus optional VLM/image-router/STT. Evidence: code/main.py:144, code/main.py:158, code/src/
+  classifiers/media_extractor.py:81.
+
+  Phase 15 - Code Quality Audit
+  Hardcoding: intent map, gate strings, threshold comparisons, regexes, default model strings. Evidence: code/src/routing_engine/decision_tree.py:22, code/
+  src/routing_engine/safe_fallback.py:29, code/config/settings.py:119.
+
+  Long method: process_single_message spans code/main.py:46 to code/main.py:227.
+
+  Duplicated vocabulary: schema, router, validator, prompts all define overlapping labels. Evidence: code/src/classifiers/schema_models.py:6, code/src/
+  output_validator/validate_output_csv.py:10.
+
+  Phase 16 - Requirement Coverage
+
+   Requirement                                                       Implemented?    Evidence / risk
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Terminal runnable main                                               Partially    help works; full default writes sample output. code/main.py:260, code/
+                                                                                     config/config.yaml:28
+  ──────────────────────────  ────────────────────────────────────────────────────  ────────────────────────────────────────────────────────────────────────
+   Media inspection                                                     Partially    VLM/STT code exists; live correctness not proven.
+  ──────────────────────────  ────────────────────────────────────────────────────  ────────────────────────────────────────────────────────────────────────
+   Evidence relevance                                                  Not Proven    existence-only validation. code/main.py:217
+  Phase 17 - Final Verdict
+
+  1. Actual problem solved: a local batch CSV message router pipeline, defaulting to sample evaluation output, with an existing full dataset/output.csv.
+     Evidence: code/config/config.yaml:28.
+
+  2. Claimed problem: production-grade AI-powered multimodal personalized WhatsApp notification router. Evidence: README.md:7, doc/SAFETY_CHECK.md:36.
+  3. Unsupported claims: production-grade, CI/CD, Hypothesis fuzzing, fail-fast API-key exit, chronological sorting, recipient-bound evidence validation,
+     dynamic orchestration. Evidence cited above.
+
+  4. Requirements satisfaction: partially. Current output schema/row count is satisfied; default generation path does not target required full output.
+  5. Architecture appropriateness: partially appropriate for a hackathon batch classifier; not production architecture.
+  6. Orchestration: hardcoded/static, not dynamic.
+  7. AI implementation: real external model calls are implemented, but behavior is mostly fixed prompt sequencing plus deterministic rules.
+  8. Production-grade: No.
+  9. Highest-risk issues: default config targets sample output; evaluator safety check is invalid; prompt/media/evidence paths are partially validated; no
+     CI/deployment/observability; docs overstate implementation.
+
+  10. Production approval: No. Evidence does not support production readiness.
