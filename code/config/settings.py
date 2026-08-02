@@ -107,8 +107,30 @@ def load_config(path: str) -> AppConfig:
     if raw_config is None:
         raw_config = {}
 
-    if "models" not in raw_config:
+    if "models" not in raw_config or raw_config["models"] is None:
         raw_config["models"] = {}
+
+    # ── Auto-Detect Provider from API Keys in Environment ──
+    # If the user commented out the models in config.yaml, auto-select based on .env
+    if "llm_model" not in raw_config["models"] or not raw_config["models"]["llm_model"]:
+        if os.environ.get("FIREWORKS_API_KEY"):
+            raw_config["models"]["llm_model"] = "fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct"
+            raw_config["models"]["vlm_model"] = "fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct"
+        elif os.environ.get("AWS_ACCESS_KEY_ID"):
+            raw_config["models"]["llm_model"] = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
+            raw_config["models"]["vlm_model"] = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
+        elif os.environ.get("OPENAI_API_KEY"):
+            raw_config["models"]["llm_model"] = "openai/gpt-4o"
+            raw_config["models"]["vlm_model"] = "openai/gpt-4o"
+        elif os.environ.get("ANTHROPIC_API_KEY"):
+            raw_config["models"]["llm_model"] = "anthropic/claude-3-5-sonnet-20241022"
+            raw_config["models"]["vlm_model"] = "anthropic/claude-3-5-sonnet-20241022"
+        else:
+            raw_config["models"]["llm_model"] = "gemini/gemini-2.5-flash"
+            raw_config["models"]["vlm_model"] = "gemini/gemini-2.5-flash"
+            
+    if "stt_model" not in raw_config["models"] or not raw_config["models"]["stt_model"]:
+        raw_config["models"]["stt_model"] = "openai/whisper-1"
 
     env_overrides = {
         "ORCHESTRATE_LLM_MODEL": ("models", "llm_model"),
@@ -118,8 +140,6 @@ def load_config(path: str) -> AppConfig:
     for env_key, (section, field) in env_overrides.items():
         value = os.environ.get(env_key)
         if value:
-            if section not in raw_config:
-                raw_config[section] = {}
             raw_config[section][field] = value
 
     # ── Validate via Pydantic v2 (Parse, Don't Validate) ──
@@ -135,6 +155,8 @@ def load_config(path: str) -> AppConfig:
         "gemini": "GEMINI_API_KEY",
         "openai": "OPENAI_API_KEY",
         "anthropic": "ANTHROPIC_API_KEY",
+        "bedrock": "AWS_ACCESS_KEY_ID",
+        "fireworks_ai": "FIREWORKS_API_KEY",
     }
     expected_env = provider_env_map.get(provider)
     if expected_env and not os.environ.get(expected_env):

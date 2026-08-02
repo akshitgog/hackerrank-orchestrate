@@ -1,7 +1,16 @@
 models:
-  llm_model: "gemini/gemini-2.5-flash"    # LiteLLM format, swappable
-  vlm_model: "gemini/gemini-2.5-flash"    # Multimodal VLM
-  stt_model: "openai/whisper-1"           # STT for voice notes
+  # ── Swappable AI Provider Models (via LiteLLM) ──
+  # LiteLLM automatically routes requests based on the prefix:
+  #   • AWS Bedrock   : "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0" (requires AWS keys)
+  #   • Fireworks AI  : "fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct" (requires FIREWORKS_API_KEY)
+  #   • Google Gemini : "gemini/gemini-2.5-flash", "gemini/gemini-1.5-pro" (requires GEMINI_API_KEY)
+  #   • OpenAI        : "openai/gpt-4o", "openai/gpt-4o-mini"               (requires OPENAI_API_KEY)
+  #   • Anthropic     : "anthropic/claude-3-5-sonnet-20241022"               (requires ANTHROPIC_API_KEY)
+  #
+  # Active configuration (auto-overridden by settings.py if other API keys are present in .env):
+  llm_model: "gemini/gemini-2.5-flash"    # Text semantic classification
+  vlm_model: "gemini/gemini-2.5-flash"    # Image OCR / poster inspection
+  stt_model: "openai/whisper-1"           # Voice note transcription
 
 execution:
   max_retries: 3
@@ -15,7 +24,7 @@ media:
 paths:
   dataset_dir: "dataset"
   output_file: "dataset/output.csv"
-  cache_dir: ".cache"
+  cache_dir: "code/.cache"
 
 confidence:
   gate_scam: 0.95

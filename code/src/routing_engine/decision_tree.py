@@ -61,7 +61,7 @@ def route_message(
     """
     # If sensor failed entirely, use heuristic fallback
     if sensor_obs is None:
-        from .fallback import heuristic_classify
+        from .safe_fallback import heuristic_classify
         return heuristic_classify(message, user_profile, group_membership, business_relationship, config)
 
     # Extract semantic labels from LLM observation

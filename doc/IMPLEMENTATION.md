@@ -43,16 +43,13 @@ code/
 │   │   └── safe_fallback.py    # Universal Safe-Default Row & regex heuristic classifier
 │   └── output_validator/       # LAYER 4: OUTPUT CONTRACT ENFORCEMENT
 │       ├── __init__.py
-│       └── validate_output_csv.py # 110-row invariant, enum validation, evidence ID verification
+├── tests/                      # PRACTICAL OFFLINE TEST SUITE (pytest fixtures & regression lock)
+│   ├── __init__.py
+│   ├── conftest.py             # Shared Pytest fixtures and mock helpers
+│   ├── test_schema_models.py   # Verifies Parse-Don't-Validate typed seams
+│   ├── test_decision_tree.py   # Practical 5-line sample row regression fixtures (like June edition)
+│   └── test_properties.py      # Hypothesis property-based fuzzing for schema invariants
 └── main.py                     # CLI entry point; asyncio event loop & batch pipeline orchestration
-```
-
-test/                           # OFFLINE & PROPERTY-BASED TEST SUITE
-├── test_data_loader.py         # Verifies CSV schema loading and history feature calculations
-├── test_policy_tree.py         # Verifies short-circuit gates (scam, promo opt-out, emergency override)
-├── test_evidence_validator.py  # Verifies invalid/hallucinated evidence IDs are replaced with 'none'
-├── test_formula_offline.py     # Offline simulation benchmark against dataset/sample_messages.csv
-└── test_properties.py          # Hypothesis property-based fuzzing for schema invariants and row ordering
 ```
 
 ---

@@ -23,19 +23,22 @@ Each of our 4 Quality Control Layers owns a distinct failure mode with explicit 
 
 ## 2. CI/CD PRODUCTION GATE (AUTOMATED PIPELINE)
 
-Our automated continuous integration pipeline enforces **Layer 1** on every pull request. No merge is permitted unless all three checks pass in under 5 seconds with zero API calls:
+Our automated continuous integration pipeline enforces **Layer 1** on every pull request. No merge is permitted unless all four stages pass in under 5 seconds with zero API calls:
 
 ```text
 [ Git Push / Pull Request ]
              │
              ▼
-[ Stage 1: Static Schema & Syntax Check ]  ──► (py_compile, mypy typed seams)
+[ Stage 1: Static Schema & Syntax Check ]      ──► (py_compile, mypy typed seams)
              │
              ▼
-[ Stage 2: Decoupled Offline Mock Suite ]  ──► (pytest test/test_decision_tree.py)
+[ Stage 2: June-Style Regression Fixtures ]    ──► (pytest code/tests/test_regression_fixtures.py)
              │
              ▼
-[ Stage 3: Property-Based Hypothesis Fuzzing ] ──► (500 fuzzed input permutations)
+[ Stage 3: Property-Based Hypothesis Fuzzing ] ──► (pytest code/tests/test_property_invariants.py)
+             │
+             ▼
+[ Stage 4: System Acceptance Unit Tests ]      ──► (pytest code/tests/test_system_acceptance.py)
              │
              ▼
       [ MERGE APPROVED ]
@@ -45,17 +48,23 @@ Our automated continuous integration pipeline enforces **Layer 1** on every pull
 * Enforces that all 11 CSV files in `dataset/` conform to `schema_contract.json`.
 * Enforces that no hardcoded credentials or API keys exist in source code (12-Factor App check).
 
-### Stage 2: Offline Mock Unit Tests (`pytest`)
-* Mocks `LLMAdapter` and `extract_image`/`extract_audio` responses.
-* Validates that `route_message()` correctly routes all 7 Gates:
+### Stage 2: June-Style Regression Fixtures (`test_regression_fixtures.py`)
+* Uses clean helper builders (`obs()`, `decide_obs()`) modeled after the June reference repository.
+* Validates that `route_message()` correctly routes all Golden Anchors and historical sample rows:
   * Emergency Override $\rightarrow$ `notify`
   * DND Quiet Hours $\rightarrow$ `digest` / `mute`
   * Scam / Phishing $\rightarrow$ `mute`
   * Promo Opt-Out $\rightarrow$ `mute`
 
-### Stage 3: Property-Based Fuzzing (`Hypothesis`)
+### Stage 3: Property-Based Fuzzing (`test_property_invariants.py`)
 * Runs `@settings(max_examples=500)` across random text strings, Unicode, and extreme numerical boundaries.
 * Confirms that no input permutation ever causes an unhandled exception or produces an out-of-vocabulary action (`notify`/`digest`/`mute`).
+
+### Stage 4: System Acceptance Unit Testing (`test_system_acceptance.py`)
+* Verifies formal system acceptance contracts across batch execution:
+  * **110-Row Completeness:** Exactly 1-to-1 input-to-output mapping without dropped rows or duplicates.
+  * **Safety & Fraud Acceptance Invariants:** Zero false-negative rate on scams (`mute`) and medical emergencies (`notify`).
+  * **Vocabulary Compliance:** 100% of rows contain valid `action`, float `confidence` in `[0.0, 1.0]`, and valid `evidence_message_ids`.
 
 ---
 

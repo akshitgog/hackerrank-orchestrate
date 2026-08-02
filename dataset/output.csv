@@ -1,111 +1,111 @@
-message_id,action,message_type,reason,confidence,evidence_message_ids
-msg_023,,,,,
-msg_091,,,,,
-msg_090,,,,,
-msg_048,,,,,
-msg_040,,,,,
-msg_075,,,,,
-msg_005,,,,,
-msg_104,,,,,
-msg_069,,,,,
-msg_107,,,,,
-msg_070,,,,,
-msg_003,,,,,
-msg_099,,,,,
-msg_008,,,,,
-msg_092,,,,,
-msg_060,,,,,
-msg_004,,,,,
-msg_030,,,,,
-msg_045,,,,,
-msg_052,,,,,
-msg_009,,,,,
-msg_071,,,,,
-msg_016,,,,,
-msg_065,,,,,
-msg_038,,,,,
-msg_086,,,,,
-msg_014,,,,,
-msg_094,,,,,
-msg_029,,,,,
-msg_105,,,,,
-msg_002,,,,,
-msg_010,,,,,
-msg_078,,,,,
-msg_013,,,,,
-msg_018,,,,,
-msg_044,,,,,
-msg_032,,,,,
-msg_106,,,,,
-msg_006,,,,,
-msg_109,,,,,
-msg_108,,,,,
-msg_019,,,,,
-msg_088,,,,,
-msg_056,,,,,
-msg_027,,,,,
-msg_050,,,,,
-msg_083,,,,,
-msg_063,,,,,
-msg_033,,,,,
-msg_061,,,,,
-msg_020,,,,,
-msg_017,,,,,
-msg_058,,,,,
-msg_026,,,,,
-msg_047,,,,,
-msg_046,,,,,
-msg_042,,,,,
-msg_079,,,,,
-msg_098,,,,,
-msg_037,,,,,
-msg_007,,,,,
-msg_085,,,,,
-msg_001,,,,,
-msg_021,,,,,
-msg_028,,,,,
-msg_012,,,,,
-msg_064,,,,,
-msg_103,,,,,
-msg_031,,,,,
-msg_057,,,,,
-msg_087,,,,,
-msg_067,,,,,
-msg_039,,,,,
-msg_082,,,,,
-msg_066,,,,,
-msg_049,,,,,
-msg_015,,,,,
-msg_051,,,,,
-msg_097,,,,,
-msg_089,,,,,
-msg_053,,,,,
-msg_059,,,,,
-msg_024,,,,,
-msg_072,,,,,
-msg_036,,,,,
-msg_076,,,,,
-msg_055,,,,,
-msg_102,,,,,
-msg_080,,,,,
-msg_093,,,,,
-msg_034,,,,,
-msg_035,,,,,
-msg_101,,,,,
-msg_041,,,,,
-msg_011,,,,,
-msg_110,,,,,
-msg_095,,,,,
-msg_074,,,,,
-msg_073,,,,,
-msg_054,,,,,
-msg_068,,,,,
-msg_100,,,,,
-msg_062,,,,,
-msg_096,,,,,
-msg_043,,,,,
-msg_077,,,,,
-msg_081,,,,,
-msg_025,,,,,
-msg_084,,,,,
-msg_022,,,,,
+"message_id","action","message_type","reason","confidence","evidence_message_ids"
+"msg_023","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_091","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_090","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_048","notify","urgent","Heuristic fallback: urgency keywords detected.","0.95","none"
+"msg_040","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_075","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_005","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_104","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_069","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_107","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_070","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_003","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_099","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_008","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_092","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_060","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.70","none"
+"msg_004","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_030","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_045","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_052","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.85","none"
+"msg_009","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_071","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_016","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_065","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.70","none"
+"msg_038","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_086","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_014","mute","promotion","Heuristic fallback: promotional content, user opted out.","0.95","none"
+"msg_094","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.85","none"
+"msg_029","mute","forward","Heuristic fallback: highly forwarded chain message.","0.55","none"
+"msg_105","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_002","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_010","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_078","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_013","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.85","none"
+"msg_018","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_044","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_032","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_106","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_006","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_109","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_108","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_019","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.85","none"
+"msg_088","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_056","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_027","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.70","none"
+"msg_050","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_083","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_063","notify","urgent","Heuristic fallback: urgency keywords detected.","0.95","none"
+"msg_033","digest","greeting","Heuristic fallback: casual greeting.","0.85","none"
+"msg_061","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_020","notify","urgent","Heuristic fallback: urgency keywords detected.","0.95","none"
+"msg_017","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_058","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_026","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.85","none"
+"msg_047","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_046","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_042","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_079","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_098","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_037","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_007","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_085","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_001","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_021","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_028","mute","promotion","Heuristic fallback: promotional content, user opted out.","0.80","none"
+"msg_012","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_064","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_103","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_031","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_057","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_087","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_067","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_039","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_082","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_066","mute","promotion","Heuristic fallback: promotional content, user opted out.","0.80","none"
+"msg_049","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_015","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_051","mute","promotion","Heuristic fallback: promotional content, user opted out.","0.95","none"
+"msg_097","notify","urgent","Heuristic fallback: urgency keywords detected.","0.95","none"
+"msg_089","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_053","mute","forward","Heuristic fallback: highly forwarded chain message.","0.55","none"
+"msg_059","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_024","mute","promotion","Heuristic fallback: promotional content, user opted out.","0.95","none"
+"msg_072","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_036","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_076","digest","promotion","Heuristic fallback: promotional content, user opted in.","0.85","none"
+"msg_055","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_102","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_080","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_093","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_034","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_035","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_101","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_041","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_011","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_110","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_095","mute","scam","Heuristic fallback: credential/phishing keywords detected.","0.95","none"
+"msg_074","mute","forward","Heuristic fallback: highly forwarded chain message.","0.55","none"
+"msg_073","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_054","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_068","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_100","notify","urgent","Heuristic fallback: urgency keywords detected.","0.95","none"
+"msg_062","mute","forward","Heuristic fallback: highly forwarded chain message.","0.55","none"
+"msg_096","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_043","mute","forward","Heuristic fallback: highly forwarded chain message.","0.70","none"
+"msg_077","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_081","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_025","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"
+"msg_084","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.70","none"
+"msg_022","digest","unknown","Automated pipeline fallback due to unrecoverable sensor error.","0.85","none"

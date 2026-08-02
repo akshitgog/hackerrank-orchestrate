@@ -1,7 +1,7 @@
 # 🧪 PRODUCTION-GRADE TESTING PLAYBOOK (`testing.md`)
 
 **Document Name:** `testing.md`  
-**Scope:** Universal Test Case Creation Workflow, Decoupled Sub-System Evaluation, and Property-Based Testing  
+**Scope:** Universal Test Case Creation Workflow, Decoupled Offline Mock Testing, Property-Based Fuzzing, June-Style Regression Fixtures, and System Acceptance Unit Testing  
 **Project:** HackerRank Orchestrate — WhatsApp Message Notification Router  
 
 ---
@@ -54,24 +54,6 @@ Every domain invariant layer must be tested in **complete isolation using mock s
 2. **Pinpoint Fault Isolation:** A test failure points to exactly one class or function.
 3. **CI/CD Sandbox Execution:** Runs in automated pipelines with zero secrets or network access.
 
-```python
-# Production-grade offline mock pattern for WhatsApp Routing Engine
-from src.classifiers.schema_models import SensorObservation
-from src.routing_engine.decision_tree import route_message
-
-def test_emergency_override_invariant():
-    mock_obs = SensorObservation(
-        intent="emergency",
-        urgency="high",
-        sender_relationship="contact",
-        contains_actionable_item=True,
-        reasoning="Medical emergency reported"
-    )
-    decision = route_message(mock_obs, is_dnd=True, is_opted_out=False)
-    assert decision.action == "notify"
-    assert decision.reason == "emergency_override"
-```
-
 ---
 
 ## 3. PROPERTY-BASED TESTING WITH `HYPOTHESIS`
@@ -88,52 +70,63 @@ Hand-crafted unit tests check discrete examples. Property-based testing with **`
 | `@given(st.lists(st.text(), min_size=0))` | Evidence message ID lists — verifies empty or large historical evidence sets never crash. |
 | `@settings(max_examples=500)` | Fuzzes 500 generated permutations per test run to uncover obscure edge cases. |
 
+---
+
+## 4. SYSTEM ACCEPTANCE UNIT TESTING (UAT / ACCEPTANCE CRITERIA)
+
+**System Acceptance Unit Testing** bridges unit tests and full system delivery. While standard unit tests verify isolated functions (`is_scam -> True`), **System Acceptance Unit Tests** verify that the integrated system satisfies formal **Contractual Acceptance Criteria** before release.
+
+### 1. What is an Acceptance Criterion in AI Orchestration?
+An acceptance criterion is a non-negotiable business or dataset rule that the system must satisfy across an entire batch or end-to-end pipeline run to be deemed production-ready.
+
+### 2. Our 4 Formal System Acceptance Criteria
+1. **110-Row Completeness Criterion:** Given `dataset/messages.csv` containing 110 rows, the system MUST output exactly 110 prediction rows in `dataset/output.csv`, with 0 dropped rows and 0 duplicate `message_id`s.
+2. **Schema Vocabulary Criterion:** Exactly 100% of output rows must contain valid vocabulary values (`action` in `{"notify", "digest", "mute"}`, float confidence in `[0.0, 1.0]`).
+3. **Safety & Emergency Acceptance Criterion:** 100% of messages classified as medical/physical safety emergencies must output `action="notify"`, even during DND hours (`is_dnd=True`).
+4. **Scam & Fraud Suppression Criterion:** 100% of messages classified as financial phishing or scams must output `action="mute"`, regardless of urgency score.
+
+### 3. How We Implement System Acceptance Unit Tests (`test_system_acceptance.py`)
 ```python
-from hypothesis import given, settings, strategies as st
-from src.classifiers.schema_models import SensorObservation
-from src.routing_engine.decision_tree import route_message
-
-ALLOWED_ACTIONS = {"notify", "digest", "mute"}
-
-@given(
-    intent=st.sampled_from(["emergency", "transactional", "promotional", "scam", "general"]),
-    urgency=st.sampled_from(["low", "medium", "high", "critical"]),
-    is_dnd=st.booleans(),
-    is_opted_out=st.booleans()
-)
-@settings(max_examples=500)
-def test_decision_tree_exhaustive_invariants(intent, urgency, is_dnd, is_opted_out):
-    mock_obs = SensorObservation(
-        intent=intent,
-        urgency=urgency,
-        sender_relationship="contact",
-        contains_actionable_item=True,
-        reasoning="Hypothesis fuzzed observation"
-    )
-    decision = route_message(mock_obs, is_dnd=is_dnd, is_opted_out=is_opted_out)
-    
-    # Invariant 1: Action must always be a valid spec vocabulary word
-    assert decision.action in ALLOWED_ACTIONS
-    
-    # Invariant 2: Confidence must be within [0.0, 1.0]
-    assert 0.0 <= decision.confidence <= 1.0
-    
-    # Invariant 3: Scam intent must always route to mute
-    if intent == "scam":
-        assert decision.action == "mute"
+# Production Acceptance Test Pattern
+def test_acceptance_110_row_completeness_invariant():
+    """Verifies that running the router over sample messages produces exact 1-to-1 completeness."""
+    input_rows = load_test_dataset()
+    output_rows = run_batch_pipeline(input_rows, offline_mode=True)
+    assert len(output_rows) == len(input_rows)
+    assert set(r["message_id"] for r in output_rows) == set(r["message_id"] for r in input_rows)
 ```
 
 ---
 
-## 4. TEST DIRECTORY ARCHITECTURE
+## 5. 4-TIER TEST DIRECTORY ARCHITECTURE (`code/tests/`)
+
+Our test suite in `code/tests/` enforces **four distinct testing tiers**, combining June-style practical helper builders with Staff-level invariant fuzzing and system acceptance testing:
 
 ```text
-test/
+code/tests/
 ├── __init__.py
-├── conftest.py                   # Pytest fixtures and synthetic data loaders
-├── test_schema_models.py         # Verifies Parse-Don't-Validate typed seams
-├── test_decision_tree.py         # Offline mock unit tests for 7-Gate routing rules
-├── test_property_invariants.py   # Hypothesis property-based fuzzing tests
-└── fixtures/
-    └── golden_anchors.json       # Immutable Golden Anchor verification rows
+├── conftest.py                   # Shared offline mocks and builder helpers (claim, obs, decide)
+├── test_schema_seams.py          # TIER 1: Parse-Don't-Validate boundary tests (Pydantic v2 seams)
+├── test_regression_fixtures.py   # TIER 2: June-Style Regression Fixtures (helper builders + sample rows)
+├── test_property_invariants.py   # TIER 3: Hypothesis property-based fuzzing (500 permutations)
+└── test_system_acceptance.py     # TIER 4: System Acceptance Unit Tests (completeness & contract UAT)
+```
+
+### Why We Use June-Style Helper Builders in Tier 2 (`test_regression_fixtures.py`)
+Adopting the clean helper-builder pattern from `hackerrank-orchestrate-june`, we encode representative sample rows and Golden Anchors as concise 5-line unit test fixtures:
+
+```python
+# June-Style Helper Builder Pattern in Tier 2
+def obs(intent="transactional", urgency="medium", **kw):
+    base = dict(intent=intent, urgency=urgency, sender_relationship="contact",
+                contains_actionable_item=True, reasoning="test fixture")
+    base.update(kw)
+    return SensorObservation(**base)
+
+def decide_obs(o, dnd=False, opt_out=False):
+    return route_message(o, is_dnd=dnd, is_opted_out=opt_out)
+
+def test_case_emergency_override_fixture():
+    r = decide_obs(obs(intent="emergency", urgency="high"), dnd=True)
+    assert (r.action, r.reason) == ("notify", "emergency_override")
 ```
