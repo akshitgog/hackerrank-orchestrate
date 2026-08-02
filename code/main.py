@@ -67,23 +67,38 @@ async def process_single_message(
         business_rel = get_business_relationship(ctx, user_id, business_id) if business_id else None
         dnd_active = is_in_dnd(user_profile, message.get("created_at", ""))
 
-        # Build history context for LLM prompt
-        history_context = []
+        # Build history context for LLM prompt (trimmed to essential fields only)
+        raw_history = []
         if sender_user_id:
-            history_context.extend(get_sender_history(ctx, user_id, sender_user_id, limit=3))
+            raw_history.extend(get_sender_history(ctx, user_id, sender_user_id, limit=3))
         if business_id:
-            history_context.extend(get_business_history(ctx, user_id, business_id, limit=3))
+            raw_history.extend(get_business_history(ctx, user_id, business_id, limit=3))
         if group_id:
-            history_context.extend(get_group_history(ctx, user_id, group_id, limit=3))
+            raw_history.extend(get_group_history(ctx, user_id, group_id, limit=3))
         # Deduplicate by message_id
         seen_ids = set()
         unique_history = []
-        for h in history_context:
+        for h in raw_history:
             hid = h.get("message_id", "")
             if hid not in seen_ids:
                 seen_ids.add(hid)
                 unique_history.append(h)
-        history_context = unique_history[:5]
+        # Trim to essential fields — reduce token bloat for the router
+        history_context = []
+        for h in unique_history[:5]:
+            event = ctx.message_events.get(h.get("message_id", ""), {})
+            history_context.append({
+                "message_id": h.get("message_id", ""),
+                "sender_user_id": h.get("sender_user_id", ""),
+                "created_at": h.get("created_at", ""),
+                "conversation_type": h.get("conversation_type", ""),
+                "media_type": h.get("media_type", ""),
+                "forwarded_count": h.get("forwarded_count", 0),
+                "message_text_preview": (h.get("message_text", "") or "")[:80],
+                "user_opened": event.get("message_opened", ""),
+                "user_dismissed": event.get("notification_dismissed", ""),
+                "user_reported": event.get("message_reported", ""),
+            })
         
         # Build interaction history
         fatigue_score = get_notification_fatigue(ctx, user_id)

@@ -56,10 +56,13 @@ def build_msg_observer_prompt(
     system_prompt = template["system"]
     user_template = template["user"]
 
+    group_summary = "No group context"
+    if group_info:
+        group_summary = f"{group_info.get('group_name', 'Unknown')} ({group_info.get('group_type', 'unknown')} group, {group_info.get('member_count', '?')} members)"
+
     user_prompt = user_template.format(
         user_id=message.get("user_id", "unknown"),
-        user_profile_json=json.dumps(user_profile, indent=2, ensure_ascii=False),
-        group_info_json=json.dumps(group_info, indent=2, ensure_ascii=False) if group_info else "No group context",
+        group_info_json=group_summary,
         message_id=message.get("message_id", ""),
         conversation_type=message.get("conversation_type", ""),
         sender_user_id=message.get("sender_user_id", "unknown"),

@@ -43,6 +43,7 @@ class ExecutionConfig(BaseModel):
     stt_max_retries: int
     max_concurrency: int
     timeout_seconds: int
+    temperature: float = 0
 
 
 class MediaConfig(BaseModel):

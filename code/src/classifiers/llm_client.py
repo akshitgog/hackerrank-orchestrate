@@ -52,9 +52,12 @@ class LLMAdapter:
         self.vlm_max_retries = config.execution.vlm_max_retries
         self.stt_max_retries = config.execution.stt_max_retries
         self.timeout = config.execution.timeout_seconds
+        self.temperature = config.execution.temperature
 
     async def _acompletion_with_retry(self, max_retries: int, **kwargs):
         """Call litellm.acompletion with exponential backoff retry."""
+        if "temperature" not in kwargs:
+            kwargs["temperature"] = self.temperature
         backoff = 1
         last_error = None
         for attempt in range(max_retries):
@@ -123,14 +126,26 @@ class LLMAdapter:
             except json.JSONDecodeError as e:
                 logger.warning(f"LLM returned invalid JSON (attempt {attempt + 1}): {e}")
                 if attempt == 0:
-                    # Self-correction: feed the error back to the LLM
                     messages.append({"role": "assistant", "content": content if 'content' in dir() else ""})
-                    messages.append({"role": "user", "content": f"Your response was not valid JSON: {e}. Please return ONLY valid JSON matching the SensorObservation schema."})
+                    messages.append({"role": "user", "content": (
+                        f"Your response was not valid JSON: {e}. Return ONLY valid JSON with these exact fields: "
+                        "content_intent, secondary_intents, priority_label, risk_label, "
+                        "contains_sensitive_request, is_actionable, best_evidence_ids, confidence, flag_for_review"
+                    )})
             except Exception as e:
                 logger.warning(f"LLM classification failed (attempt {attempt + 1}): {e}")
                 if attempt == 0 and 'content' in dir():
                     messages.append({"role": "assistant", "content": str(content)})
-                    messages.append({"role": "user", "content": f"Schema validation failed: {e}. Fix the JSON to match the exact schema."})
+                    messages.append({"role": "user", "content": (
+                        f"Schema validation failed: {e}. Fix the JSON. Required fields: "
+                        "content_intent (one of: casual_social, greeting_or_blessing, chain_forward, "
+                        "promotion_or_offer, transactional_update, payment_or_bill, event, urgent_operational, "
+                        "emergency, credential_or_otp_request, account_threat, prompt_injection, unknown), "
+                        "secondary_intents (array), priority_label (critical|high|medium|low), "
+                        "risk_label (critical|high|medium|low|none), contains_sensitive_request (bool), "
+                        "is_actionable (bool), best_evidence_ids (array), confidence (high|medium|low), "
+                        "flag_for_review (bool)"
+                    )})
 
         logger.error(f"classify_message failed after all retries for model={model_name}")
         return None
