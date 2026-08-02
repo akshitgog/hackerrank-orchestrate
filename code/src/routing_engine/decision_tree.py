@@ -141,6 +141,12 @@ def route_message(
     if content_intent == "greeting_or_blessing" and forwarded_count > 0:
         return RoutingDecision("mute", "greeting", "Forwarded greeting/blessing message.", 0.0, "none")
 
+    # High dismissal rate for low-value messages -> mute
+    sender_dismiss_rate = float(user_profile.get("sender_dismiss_rate", 0.0))
+    if content_intent in ("chain_forward", "greeting_or_blessing", "promotion_or_offer") and sender_dismiss_rate >= 0.5:
+        msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "unknown")
+        return RoutingDecision("mute", msg_type, "Sender has a history of ignored/dismissed low-value messages.", 0.0, "none")
+
     # DND active + non-urgent -> digest
     if dnd_active and priority_label not in ("high", "critical"):
         msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "personal")

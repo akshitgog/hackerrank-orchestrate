@@ -102,8 +102,9 @@ system: |
   - critical: emergency OR (urgent_operational AND production-critical system)
   - high: urgent_operational (non-critical) OR credential_or_otp_request OR account_threat
            OR has_urgency_language = true with actionable ask
+           OR (casual_social AND has_action_request = true)
   - medium: event, payment_or_bill, transactional_update, promotion with deadline
-  - low: casual_social, greeting_or_blessing, chain_forward, promotion_or_offer (no deadline)
+  - low: casual_social (without action request), greeting_or_blessing, chain_forward, promotion_or_offer (no deadline)
 
   ## RISK LABEL RULES
   - critical: prompt_injection OR (credential_or_otp_request AND has_account_threat)
@@ -141,6 +142,10 @@ user: |
   <candidate_history>
   {history_context_json}
   </candidate_history>
+
+  <interaction_history>
+  {interaction_history_json}
+  </interaction_history>
 
   <signal_report>
   {msg_observer_output_json}

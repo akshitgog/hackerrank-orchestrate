@@ -74,6 +74,7 @@ def build_msg_observer_prompt(
 def build_msg_router_prompt(
     message: dict,
     history_context: list[dict],
+    interaction_history: dict,
     msg_observer_output_json: str,
 ) -> tuple[str, str]:
     """Build prompt for LLM intent classification from msg_router.yaml."""
@@ -92,6 +93,7 @@ def build_msg_router_prompt(
         sender_verified=str(message.get("sender_verified", False)),
         forwarded_count=message.get("forwarded_count", 0),
         history_context_json=json.dumps(history_context, indent=2, ensure_ascii=False) if history_context else "No prior message history available",
+        interaction_history_json=json.dumps(interaction_history, indent=2, ensure_ascii=False),
         msg_observer_output_json=msg_observer_output_json,
     )
     return system_prompt, user_prompt
