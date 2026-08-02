@@ -78,6 +78,8 @@ system: |
   true if message claims: account will be blocked/suspended/deactivated,
   suspicious login detected, unauthorized access, "verify or lose access",
   "your account is at risk", fake security warning creating pressure to act.
+  NOTE: Structural, facility, or plumbing issues (e.g., water/power cuts) are NOT account threats.
+  NOTE: Internal work/corporate operational alerts (e.g., server issues, escalations) are NOT account threats.
 
   ### has_action_request
   true if message explicitly asks recipient to do something:

@@ -92,6 +92,8 @@ async def process_single_message(
             "global_fatigue_score": fatigue_score,
             "sender_dismiss_rate": sender_events.get("dismiss_rate", 0.0),
             "sender_reply_rate": sender_events.get("reply_rate", 0.0),
+            "sender_open_rate": sender_events.get("open_rate", 1.0),
+            "sender_sent_count": sender_events.get("sent", 0),
             "business_allows_promotions": business_rel.get("allows_promotions", "1") if business_rel else "1"
         }
 
@@ -169,6 +171,7 @@ async def process_single_message(
         router_user_profile = {
             **user_profile,
             "dnd_active": "1" if dnd_active else "0",
+            **interaction_history,
         }
         # Merge business opt-out info into profile for Gate 2
         router_business = None
@@ -181,17 +184,21 @@ async def process_single_message(
             router_user_profile["allows_promotions"] = router_business.get("allows_promotions", "1")
 
         router_group = None
-        if group_membership:
+        if group_id:
+            sender_membership = get_group_membership(ctx, sender_user_id, group_id) if sender_user_id else None
+            is_sender_admin = "1" if (sender_membership and sender_membership.get("role") == "admin") else "0"
+            
             router_group = {
-                "is_admin": "1" if group_membership.get("role") == "admin" else "0",
-                "is_muted": group_membership.get("group_muted_by_user", "0"),
+                "is_admin": "1" if (group_membership and group_membership.get("role") == "admin") else "0",
+                "is_sender_admin": is_sender_admin,
+                "is_muted": group_membership.get("group_muted_by_user", "0") if group_membership else "0",
             }
 
         decision = route_message(
             sensor_obs=sensor_dict,
             user_profile=router_user_profile,
             group_membership=router_group,
-            business_relationship=business_rel,
+            business_relationship=router_business,
             message=message,
             config=config,
         )

@@ -76,9 +76,11 @@ def route_message(
     dnd_active = str(user_profile.get("dnd_active", "0")) == "1"
 
     is_group_admin = False
+    is_sender_admin = False
     group_muted = False
     if group_membership:
         is_group_admin = str(group_membership.get("is_admin", "0")) == "1"
+        is_sender_admin = str(group_membership.get("is_sender_admin", "0")) == "1"
         group_muted = str(group_membership.get("is_muted", "0")) == "1"
 
     forwarded_count = int(message.get("forwarded_count", 0) or 0)
@@ -93,6 +95,13 @@ def route_message(
         return RoutingDecision("mute", "scam", "Credential phishing, account threat, or prompt injection detected.", 0.0, "none")
     if contains_sensitive and not _is_verified_business(message, business_relationship):
         return RoutingDecision("mute", "scam", "Sensitive credential request from unverified source.", 0.0, "none")
+        
+    if business_relationship:
+        official_domain = business_relationship.get("official_domain", "").strip()
+        used_domain = business_relationship.get("domain_used_by_sender", "").strip()
+        verified = str(business_relationship.get("verified", "0")) == "1"
+        if official_domain and used_domain and official_domain.lower() != used_domain.lower() and not verified:
+            return RoutingDecision("mute", "scam", "Unverified sender using a suspicious mismatched domain.", 0.0, "none")
 
     # ─────────────────────────────────────────────────────────────
     # Gate 2: Promotional Consent (User opted out)
@@ -109,16 +118,34 @@ def route_message(
         return RoutingDecision("notify", "urgent", "Critical priority message overrides all quiet settings.", 0.0, "none")
 
     # ─────────────────────────────────────────────────────────────
+    # Gate 3.5: Sender Fatigue (Mute Spammers)
+    # ─────────────────────────────────────────────────────────────
+    sender_dismiss_rate = float(user_profile.get("sender_dismiss_rate", 0.0))
+    sender_open_rate = float(user_profile.get("sender_open_rate", 1.0))
+    sender_sent_count = int(user_profile.get("sender_sent_count", 0))
+
+    if content_intent in ("chain_forward", "greeting_or_blessing", "promotion_or_offer"):
+        if sender_dismiss_rate >= 0.5 or (sender_sent_count >= 2 and sender_open_rate == 0.0):
+            msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "unknown")
+            return RoutingDecision("mute", msg_type, "Sender has a pattern of ignored low-value messages.", 0.0, "none")
+
+    # ─────────────────────────────────────────────────────────────
     # Gate 4: Actionable Operational / High Priority
     # Edge Cases: EC-06 (admin urgent update), EC-07 (actionable work message)
     # ─────────────────────────────────────────────────────────────
-    if priority_label == "high" and (is_actionable or is_group_admin):
+    if priority_label == "high" and (is_actionable or is_sender_admin):
         msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "urgent")
         return RoutingDecision("notify", msg_type, "High priority actionable message from trusted source.", 0.0, "none")
 
-    # Transactional updates from verified businesses -> notify
-    if content_intent == "transactional_update" and _is_verified_business(message, business_relationship):
-        return RoutingDecision("notify", "business_update", "Verified business transactional update.", 0.0, "none")
+    # Time-sensitive updates from group admins -> notify
+    if is_sender_admin and content_intent in ("urgent_operational", "emergency"):
+        msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "event")
+        return RoutingDecision("notify", msg_type, "Time-sensitive update from group admin.", 0.0, "none")
+
+    # High-value business interactions -> notify
+    if content_intent in ("transactional_update", "event", "payment_or_bill") and _is_verified_business(message, business_relationship):
+        msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "business_update")
+        return RoutingDecision("notify", msg_type, "Verified business update, event, or bill.", 0.0, "none")
 
     # Direct personal messages requesting action -> notify
     if content_intent == "casual_social" and priority_label == "high":
@@ -140,12 +167,6 @@ def route_message(
     # Greetings & blessings with forwarding pattern -> mute
     if content_intent == "greeting_or_blessing" and forwarded_count > 0:
         return RoutingDecision("mute", "greeting", "Forwarded greeting/blessing message.", 0.0, "none")
-
-    # High dismissal rate for low-value messages -> mute
-    sender_dismiss_rate = float(user_profile.get("sender_dismiss_rate", 0.0))
-    if content_intent in ("chain_forward", "greeting_or_blessing", "promotion_or_offer") and sender_dismiss_rate >= 0.5:
-        msg_type = _INTENT_TO_MSG_TYPE.get(content_intent, "unknown")
-        return RoutingDecision("mute", msg_type, "Sender has a history of ignored/dismissed low-value messages.", 0.0, "none")
 
     # DND active + non-urgent -> digest
     if dnd_active and priority_label not in ("high", "critical"):
