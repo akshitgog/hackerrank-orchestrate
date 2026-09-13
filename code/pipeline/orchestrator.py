@@ -230,7 +230,10 @@ def run_pipeline(
     horizon_days = int(runtime["forecast_horizon_days"])
     decisions: list[FinalDecision] = []
     failures: list[str] = []
-    for request in dataset.requests:
+    total = len(dataset.requests)
+    for index, request in enumerate(dataset.requests, 1):
+        if index % 25 == 0 or index == total or index == 1:
+            print(f"[{index}/{total}] Processing {request.request_id}...", flush=True)
         profile = dataset.profiles[request.user_id]
         raw_events = dataset.events_by_user.get(request.user_id, ())
         resolution = ResolutionResult(raw_events, False, "not_started", ())

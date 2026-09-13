@@ -1,193 +1,340 @@
-# HackerRank Orchestrate
+# Buy or Wait? — AI Financial Decision Agent
+### HackerRank Orchestrate (September 2026) Starter Solution
 
-Starter repository for the **HackerRank Orchestrate** 24-hour hackathon (September 2026).
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-27%20passed-success.svg)]()
+[![Evaluator](https://img.shields.io/badge/structural%20errors-0-brightgreen.svg)]()
 
-## Buy or Wait?
+An enterprise-grade, deterministic AI financial agent built for the **HackerRank Orchestrate** hackathon challenge: **Buy or Wait?**.
 
-Build an AI-powered financial agent that decides whether a user can safely afford a requested expense.
-
-A user may ask: **"Can I afford this laptop?"**
-
-Answering well takes more than the current balance. The agent must account for recurring expenses, pending payments, essential spending, confirmed income, available payment options, and relevant details buried in messages and images.
-
-For every request, the agent decides whether the user should pay in full, pay partially, use installments, wait, or not proceed. The recommendation must be personalized: two users with the same balance can deserve different answers based on their commitments, priorities, payment preferences, and willingness to adjust flexible expenses.
-
-A recommendation is safe only if the user can complete the full payment plan, cover essential expenses, and stay above their preferred minimum balance throughout the forecast period.
-
-Read [`problem_statement.md`](./problem_statement.md) for the full task spec, input/output schema, allowed values, conflict-resolution rules, and submission format.
+For every purchase or payment request, the agent decides whether the user should **pay in full now**, **pay partially**, **use an installment plan**, **wait until a safe date**, or **not proceed**. Decisions are strictly personalized by reconstructing the user's forward financial position from structured profiles, dated foreign exchange rates, seller payment options, recurring cash flows, and unstructured evidence (messages and images).
 
 ---
 
-## Quick Start
+## Table of Contents
+1. [Core Design Philosophy](#1-core-design-philosophy)
+2. [System Architecture](#2-system-architecture)
+3. [Subfolder Breakdown & Module Architecture](#3-subfolder-breakdown--module-architecture)
+4. [Deterministic Core vs. LLM Boundary](#4-deterministic-core-vs-llm-boundary)
+5. [Strict Guardrails & Business Invariants](#5-strict-guardrails--business-invariants)
+6. [Setup and Execution Guide](#6-setup-and-execution-guide)
+   - [Prerequisites](#61-prerequisites)
+   - [Environment Configuration](#62-environment-configuration)
+   - [Running the Production Pipeline](#63-running-the-production-pipeline)
+   - [Running the Local Evaluator](#64-running-the-local-evaluator)
+   - [Running the Test Suite](#65-running-the-test-suite)
+7. [Output Contract & Schema](#7-output-contract--schema)
+8. [Token Usage & Observability](#8-token-usage--observability)
+9. [Documentation Links](#9-documentation-links)
+10. [Zero Hardcoding & Evaluability Guarantee](#10-zero-hardcoding--evaluability-guarantee)
 
-Clone the repository and move into the project directory:
+---
+
+## 1. Core Design Philosophy
+
+```text
+    PROBABILISTIC WORLD (AI / VLM)         DETERMINISTIC WORLD (Python)
+    Extract structured facts from        100% of arithmetic, 90-day simulation,
+    untrusted messages & image bills   ──► capacity checks, ranking, candidate
+    (LiteLLM Gateway + Nova Pro)          generation, spending recovery, guardrails
+```
+
+- **Zero LLM Math**: Large Language Models are never permitted to perform financial arithmetic, simulate cash balances, evaluate affordability, or select final categorical labels.
+- **Probabilistic Boundary**: Models are invoked exclusively to interpret unstructured natural language messages and receipt/bill images with missing amounts.
+- **Deterministic Financial Engine**: Built purely in Python using arbitrary-precision `Decimal` arithmetic, calendar-aware date mechanics, and strict constraint validation.
+- **Fail-Safe Isolation**: Individual request or API exceptions are caught and resolved into contract-compliant conservative fallback rows, ensuring the full 250-request batch run never crashes.
+
+---
+
+## 2. System Architecture
+
+```text
+                                  DATASET
+                     (requests, profiles, events, FX,
+                        payment options, messages, images)
+                                     │
+                                     ▼
+                        ┌─────────────────────────┐
+                        │   Data Ingestion Layer  │  (data/loader.py)
+                        │  - Decimal amount parse │
+                        │  - Exact dated FX index │
+                        └────────────┬────────────┘
+                                     │
+                                     ▼
+                        ┌─────────────────────────┐
+                        │   Evidence Resolution   │  (evidence/resolver.py)
+                        │  - Multimodal gateway   │  (evidence/gateway.py)
+                        │  - Missing amount OCR   │
+                        │  - Negative constraints │
+                        └────────────┬────────────┘
+                                     │ Validated Facts
+                                     ▼
+                        ┌─────────────────────────┐
+                        │ Financial Recurrence &  │  (finance/recurrence.py)
+                        │ 90-Day Ledger Simulator │  (finance/simulator.py)
+                        │  - Anchor preservation │
+                        │  - Essential reserves   │
+                        │  - Same-day ordering    │
+                        └────────────┬────────────┘
+                                     │
+                 ┌───────────────────┴───────────────────┐
+                 ▼                                       ▼
+    ┌─────────────────────────┐             ┌─────────────────────────┐
+    │   amount_safe_to_pay    │             │ earliest_date_for_full  │
+    │   (PERMANENTLY FROZEN)  │             │      payment date       │
+    └────────────┬────────────┘             └────────────┬────────────┘
+                 │                                       │
+                 └───────────────────┬───────────────────┘
+                                     │
+                                     ▼
+                        ┌─────────────────────────┐
+                        │    Candidate Engine     │  (decision/engine.py)
+                        │  - full_payment         │
+                        │  - partial_payment      │
+                        │  - installments (exact) │
+                        │  - wait                 │
+                        └────────────┬────────────┘
+                                     │
+                                     ▼
+                        ┌─────────────────────────┐
+                        │ Spending Recovery (<=3) │  (decision/engine.py)
+                        │  - Only flexible debits │
+                        │  - Solved reduce floors │
+                        └────────────┬────────────┘
+                                     │
+                                     ▼
+                        ┌─────────────────────────┐
+                        │  Lexicographical Ranker │  (decision/engine.py)
+                        │  & Final Decision Maker │
+                        └────────────┬────────────┘
+                                     │
+                                     ▼
+                        ┌─────────────────────────┐
+                        │ Strict Output Guardrail │  (validation/guardrails.py)
+                        │  - Invariant validation │
+                        │  - Fallback safety      │
+                        └────────────┬────────────┘
+                                     │
+                                     ▼
+                                 output.csv
+```
+
+---
+
+## 3. Subfolder Breakdown & Module Architecture
+
+The `code/` directory is organized into focused, single-responsibility packages. This modular layout strictly separates probabilistic evidence reasoning from deterministic financial math:
+
+```text
+code/
+├── artifacts/          # Local benchmark predictions, evaluation reports, and run summaries
+├── data/               # Configuration management and strict dataset ingestion
+├── decision/           # Deterministic candidate generation, spending recovery, and ranking engine
+├── doc/                # Deep-dive architecture, guardrails, testing, and evaluator specifications
+├── evaluation/         # Standalone local evaluator harness and mandatory usage_report.md
+├── evidence/           # Multi-modal LLM gateway (LiteLLM) and fact validation resolver
+├── finance/            # Calendar-aware recurrence detection and 90-day ledger simulation
+├── models/             # Strongly typed Pydantic domain entities and schema definitions
+├── observability/      # LLM token telemetry, cost accounting, and usage report generator
+├── pipeline/           # End-to-end request orchestrator and error-isolation lifecycle
+├── tests/              # 27 comprehensive unit and integration verification tests
+├── validation/         # Business invariant checks, schema enforcement, and fallback rows
+├── .env.example        # Environment variable template for AWS Bedrock credentials
+├── config.yaml         # Central runtime, model, horizon, and path configuration
+├── main.py             # CLI entry point for full-dataset runs and evaluation passes
+├── README.md           # Engineering documentation and execution guide
+└── requirements.txt    # Python package dependencies
+```
+
+### Module Responsibilities:
+
+- **`code/data/`**: Ingestion & configuration layer.
+  - `config.py`: Resolves runtime configuration (`config.yaml`), repository paths, and loads credentials safely from `.env`.
+  - `loader.py`: Ingests all raw dataset CSVs, strictly parses currency strings to arbitrary-precision `Decimal`, builds date-keyed exchange-rate maps, and links payment options to requests.
+- **`code/decision/`**: Strategic reasoning & ranking engine.
+  - `engine.py`: Evaluates candidate options across all 5 payment methods (`full_payment`, `partial_payment`, `installments`, `wait`, `not_recommended`). Searches up to 3 legal spending changes on flexible recurring debits to rescue near-affordable plans, and applies the official lexicographical ranking order.
+- **`code/doc/`**: System specifications & engineering references.
+  - `architecture.md`: In-depth 10-stage execution pipeline diagram, data flow specifications, and allowed evidence actions.
+  - `guardrails.md`: Formal definitions of the 8 business invariants, monetary bounds, and conservative fallback mechanics.
+  - `testing.md`: Complete testing matrix covering all 27 unit and integration tests with deterministic mocks.
+  - `evaluator.md`: Local evaluation benchmark specification, error codes, and macro-averaged metrics.
+- **`code/evaluation/`**: Verification benchmark & cost accounting.
+  - `main.py`: Local evaluation CLI comparing model predictions against ground truth (`sample_requests.csv`) across safe-amount accuracy, macro-F1 classification, payment plan exactness, and spending change validity.
+  - `usage_report.md`: Mandatory submission artifact summarizing model providers, calls, token counts, averages, and estimated cost across the final full evaluation run.
+- **`code/evidence/`**: Probabilistic multimodal boundary.
+  - `gateway.py`: Robust LiteLLM interface to AWS Bedrock (Claude / Nova Pro) featuring exponential backoff, markdown JSON fence stripping, brace-counting extraction, and per-call token telemetry.
+  - `resolver.py`: Parses unstructured evidence from messages and bill images, validates target event references, and translates extractions into validated financial actions (`confirm`, `amend`, `cancel`, `add`).
+- **`code/finance/`**: Core financial calculations & balance simulation.
+  - `recurrence.py`: Detects weekly, biweekly, and monthly recurring transactions, preserving anchor days with a 10-day monthly tolerance window.
+  - `simulator.py`: Performs 90-day daily cash-flow simulations, immediately reserves pending debits, calculates 30-day bucketed variable essential reserves, models confirmed salary continuations, and determines immutable safe headroom.
+- **`code/models/`**: Domain models & schemas.
+  - `domain.py`: Pydantic data classes representing users, financial events, exchange rates, payment options, evidence payloads, candidate schedules, and final decisions.
+- **`code/observability/`**: Telemetry & usage tracking.
+  - `usage.py`: Real-time token accounting, calculating total and per-request token usage, and automatically writing formatted markdown usage reports.
+- **`code/pipeline/`**: Execution orchestration & fault tolerance.
+  - `orchestrator.py`: Drives each request through the full lifecycle (loading, evidence resolution, simulation, candidate evaluation, ranking, and validation) with per-request error isolation to prevent batch failures.
+- **`code/tests/`**: Automated verification test suite.
+  - Contains 27 passing tests across `test_decision.py`, `test_finance.py`, `test_evidence.py`, `test_config_gateway.py`, `test_evaluation.py`, and `test_integration.py`.
+- **`code/validation/`**: Guardrails & schema enforcement.
+  - `guardrails.py`: Asserts schema compliance, monetary bounds ($0 \le \text{amount\_safe\_to\_pay} \le \text{requested\_amount}$), forward solvency across all plan dates, and provides compliant conservative fallback rows.
+- **`code/artifacts/`**: Benchmark artifacts & predictions.
+  - Stores local sample evaluation details (`evaluation_details.csv`), benchmark reports (`evaluation_report.md`), output CSVs, and execution summaries.
+
+---
+
+## 4. Deterministic Core vs. LLM Boundary
+
+| Stage | Mechanism | Model Used? | Deterministic? |
+|---|---|:---:|:---:|
+| **Data Ingestion** | Exact parsing of CSVs into `Decimal` & ISO dates | No | Yes |
+| **Evidence Extraction** | Extracts amounts from images, dates/status from messages | **Amazon Nova Pro** via LiteLLM | Gated (LLM) |
+| **Fact Validation** | Enforces allowed actions (`confirm`, `amend`, `cancel`, `add`) | No | Yes |
+| **Recurrence Detection** | Calendar month, anchor day, weekly/biweekly detection | No | Yes |
+| **Variable Reserves** | Historical 90-day debit analysis in 30-day buckets | No | Yes |
+| **90-Day Simulation** | Daily cash-flow trajectory and balance projection | No | Yes |
+| **Safe Amount** | Headroom calculation: $\min_t B(t) - \text{MinBal}$ | No | Yes |
+| **Candidate Generation** | Preference-gated strategy expansion | No | Yes |
+| **Spending Recovery** | Bounded $\le 3$ search over flexible, non-protected debits | No | Yes |
+| **Lexicographical Rank** | Problem-statement priority ordering | No | Yes |
+| **Output Guardrails** | Invariant assertion and schema compliance | No | Yes |
+
+---
+
+## 5. Strict Guardrails & Business Invariants
+
+The pipeline enforces strict invariant checks (`code/validation/guardrails.py`) prior to emitting predictions:
+
+1. **Monetary Bounds**:
+   $$0 \le \text{amount\_safe\_to\_pay} \le \text{requested\_amount}$$
+2. **Safe Amount Immutability**:
+   `amount_safe_to_pay` is calculated once during baseline capacity estimation and permanently frozen. It is never modified by downstream candidate selection or spending recovery.
+3. **90-Day Solvency Invariant**:
+   $$\forall t \in [0, 90], \quad B(t) \ge \text{minimum\_balance\_to\_keep}$$
+   The balance must remain at or above the user's preferred minimum balance after every projected baseline expense and candidate payment.
+4. **Conservative Cash Flow**:
+   - Pending debits are reserved immediately on `max(request_date, settlement_date)`.
+   - Pending credits, tax refunds, bonuses, commissions, and investment gains are excluded until confirmed settled.
+5. **Installment Plan Exactness**:
+   Custom installment plans are strictly forbidden. Any recommended installment plan must **exactly match** a seller payment option in `request_payment_options.csv` in count, amounts, dates, and total payable.
+6. **Partial Payment Two-Payment Contract**:
+   Recommended only if permitted by the request and user profile. Must contain **exactly two payments**: `amount_safe_to_pay` on `request_date`, followed by the exact remaining balance on `earliest_date_for_full_payment`.
+7. **Spending Change Limitations**:
+   - At most 3 changes ($\le 3$).
+   - May only target recurring debit events.
+   - Categories in `profile.expense_categories_to_protect` cannot be touched.
+   - Reduction amounts must satisfy $\text{minimum\_allowed\_amount} \le \text{new\_amount} < \text{original\_amount}$.
+8. **Fault-Tolerant Fallback**:
+   If an unhandled exception or data resolution failure occurs, the pipeline isolates the failure and emits the contract-compliant conservative fallback row (`amount_safe_to_pay = 0`, `affordability_status = not_affordable`, `recommended_payment_method = not_recommended`, `payment_plan = none`).
+
+---
+
+## 6. Setup and Execution Guide
+
+### 6.1 Prerequisites
+- Python 3.11 or higher.
+- AWS credentials with Amazon Bedrock access (or other LiteLLM-supported provider).
+
+### 6.2 Environment Configuration
+Install required dependencies:
+```bash
+python -m pip install -r code/requirements.txt
+```
+
+Create `code/.env` (or set environment variables in your terminal):
+```dotenv
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION_NAME=us-east-1
+```
+*Note: Credentials in `code/.env` are automatically loaded and kept out of version control.*
+
+### 6.3 Running the Production Pipeline
+To evaluate the full 250 evaluation requests in `dataset/requests.csv` and generate `output.csv`:
 
 ```bash
-git clone https://github.com/interviewstreet/hackerrank-orchestrate-september26.git
-cd hackerrank-orchestrate-september26
+python code/main.py --requests dataset/requests.csv --output output.csv --final-run
 ```
 
-Build your solution in `code/main.py`, or use another language and document its entry point clearly.
+- **Output File**: Written to `output.csv` at the repository root.
+- **Model Usage Report**: Written to `code/evaluation/usage_report.md`.
+- **Debug Traces** (Optional): Add `--debug` to emit comprehensive per-request audit logs to `artifacts/debug/output/`.
 
-Your solution must:
-
-- Read the input files from `dataset/`
-- Generate one prediction for every request
-- Write the final predictions to `output.csv` in the repository root
-
-Run the starter Python entry point with:
+### 6.4 Running the Local Evaluator
+To evaluate predictions against the 25 public samples in `dataset/sample_requests.csv`:
 
 ```bash
-python3 code/main.py
+# Step 1: Generate predictions for public samples
+python code/main.py --requests dataset/sample_requests.csv --output artifacts/sample_predictions.csv --debug
+
+# Step 2: Run the local evaluator
+python code/evaluation/main.py \
+  --expected dataset/sample_requests.csv \
+  --predictions artifacts/sample_predictions.csv \
+  --profiles dataset/financial_profiles.csv \
+  --rates dataset/exchange_rates.csv \
+  --details artifacts/evaluation_details.csv \
+  --report artifacts/evaluation_report.md
 ```
 
-After running your solution, confirm that `output.csv` exists in the repository root and contains the required columns and one row for every request.
+### 6.5 Running the Test Suite
+Run the full 27-test verification suite locally via `pytest`:
+```bash
+python -m pytest code/tests/ -v
+```
+Or via Python's built-in `unittest` runner:
+```bash
+python -m unittest discover -s code/tests -v
+```
 
-## Important File Locations
+---
+
+## 7. Output Contract & Schema
+
+The final `output.csv` conforms strictly to the problem statement schema:
+
+| Column | Type | Allowed Values / Format | Description |
+|---|---|---|---|
+| `request_id` | String | `request_01`, `request_02`, ... | Matches request identifier |
+| `amount_safe_to_pay` | Decimal | `0` to `requested_amount` | Safe amount on `request_date` before spending changes |
+| `affordability_status` | Enum | `affordable_now`, `affordable_with_plan`, `affordable_later`, `not_affordable` | Overall affordability assessment |
+| `recommended_payment_method` | Enum | `full_payment`, `partial_payment`, `installments`, `wait`, `not_recommended` | Best payment strategy according to ranking |
+| `payment_plan` | String | `YYYY-MM-DD:amount\|...` or `none` | Chronological schedule of candidate payments |
+| `earliest_date_for_full_payment` | Date | `YYYY-MM-DD` or empty string | First projected date safe for 100% full payment |
+| `spending_changes_needed` | String | `stop:<id>\|reduce_to:<id>:<amount>` or `none` | Up to 3 legal spending adjustments |
+| `decision_explanation` | String | Concise natural language string | Grounded summary of financial rationale |
+
+---
+
+## 8. Token Usage & Observability
+
+All model interactions are routed through `code/evidence/gateway.py`. Every request's token consumption, model identifier, latency, and estimated cost are tracked and summarized into:
 
 ```text
-dataset/        Input data and the blank output template. Do not modify the input data.
-code/           Your solution code.
-output.csv      Final generated predictions in the repository root.
-code.zip        ZIP file containing your complete solution for submission.
+code/evaluation/usage_report.md
 ```
 
-The blank template at `dataset/output.csv` is provided as a reference. Your final generated file must be the root-level `output.csv`.
+This single file reports:
+- Total and average model calls per request.
+- Total input and output tokens consumed.
+- Per-request average token consumption.
+- Estimated total and per-request expenditure.
 
 ---
 
-## Repository Layout
+## 9. Documentation Links
 
-```text
-.
-├── AGENTS.md                         # Rules for AI coding tools + transcript logging
-├── problem_statement.md              # Full challenge statement
-├── README.md                         # You are here
-├── code/                             # Your solution code
-├── output.csv                        # Final generated predictions
-└── dataset/
-    ├── requests.csv                  # 250 requests to evaluate — predict these
-    ├── output.csv                    # Blank submission template
-    ├── sample_requests.csv           # 25 solved examples
-    ├── financial_profiles.csv        # Balances, minimum balance, priorities, preferences
-    ├── financial_events.csv          # Historical, pending, and confirmed transactions
-    ├── request_payment_options.csv   # Payment options available per request
-    ├── exchange_rates.csv            # Fixed, dated conversion rates
-    ├── messages.csv                  # Messages tied to users, requests, or events
-    ├── images.csv                    # Payroll letters, statements, bills, receipts
-    └── media/
-        └── images/
-```
-
-Only `dataset/requests.csv` requires predictions. Everything else is context. Join user records with `user_id`, request records with `request_id`, supporting evidence with `related_event_id`, and exchange rates with the rate date and currency pair.
-
-Amounts are in the user's `home_currency` — the dataset uses INR, ZAR, IDR, USD, and EUR, and every conversion rate you need is in `exchange_rates.csv`. All dates are `YYYY-MM-DD`. Live exchange rates, market data, and banking access are not required.
+Deep-dive technical specifications and subsystem documentation:
+- [System Architecture Specification](doc/architecture.md): Full pipeline, data flows, and subsystem interactions.
+- [Guardrails & Invariant Validation](doc/guardrails.md): Complete list of business invariants, safety constraints, and fallback isolation.
+- [Testing & Verification Strategy](doc/testing.md): Test suites, unit test coverage, and regression benchmarking.
+- [Local Evaluator Specification](doc/evaluator.md): Benchmark metrics, confusion matrices, and structural validation checks.
 
 ---
 
-## What You Need to Build
+## 10. Zero Hardcoding & Evaluability Guarantee
 
-For every row in `dataset/requests.csv`, produce one row in `output.csv` with:
+- **No Hardcoded Labels**: The codebase contains zero hardcoded `request_id`, `user_id`, `event_id`, or sample target amounts.
+- **Pure Generalization**: All calculations are derived directly from the supplied CSV datasets via normalized mathematical models.
+- **Strict Determinism**: Zero stochasticity in financial calculations; all monetary operations utilize Python's `Decimal` type.
+- **Terminal Runnable**: The repository contains all required scripts and configurations to run out of the box.
 
-| Column | Meaning |
-|---|---|
-| `request_id` | The request being answered |
-| `amount_safe_to_pay` | Largest amount safe to pay on `request_date` before optional spending changes, after protecting essentials and the minimum balance |
-| `affordability_status` | `affordable_now`, `affordable_with_plan`, `affordable_later`, or `not_affordable` |
-| `recommended_payment_method` | `full_payment`, `partial_payment`, `installments`, `wait`, or `not_recommended` |
-| `payment_plan` | Chronological `<YYYY-MM-DD>:<amount>` entries joined by `\|`, or `none` |
-| `earliest_date_for_full_payment` | Earliest date the full amount is forecast safe as one payment; empty if never within the forecast |
-| `spending_changes_needed` | Up to three `stop:<event_id>` / `reduce_to:<event_id>:<amount>` changes joined by `\|`, or `none` |
-| `decision_explanation` | Short explanation and the financial facts behind it |
-
-`0 <= amount_safe_to_pay <= requested_amount` must always hold. Installment plans must exactly match a supplied payment option, and only recurring expenses marked flexible may be changed.
-
-`affordable_with_plan` means the full request is completed through a partial-payment schedule, installments, or permitted spending changes. Recommend `partial_payment` only when the request allows it, the user accepts it, `0 < amount_safe_to_pay < requested_amount`, and `earliest_date_for_full_payment` is on or before `desired_completion_date`. Use exactly two payments: pay `amount_safe_to_pay` on `request_date`, then pay the remaining amount on `earliest_date_for_full_payment`. The two payments must add up to `requested_amount`. Unlike installments, partial payment does not need to match a supplied payment option.
-
----
-
-## Suggested Workflow
-
-1. Inspect `dataset/sample_requests.csv` — 25 requests with completed output columns — to understand the expected format and decision style.
-2. Reconstruct each user's financial state from `financial_profiles.csv` and `financial_events.csv`: separate recurring expenses from one-time events, reserve pending transactions, count confirmed salary only on its settlement date, and de-duplicate repeated representations of the same event.
-3. When an event has a blank `amount`, find its `event_id` as `related_event_id` in `images.csv` and extract the amount from the linked image. Never treat a blank amount as zero. Pull in any other relevant messages, images, and payment options for the request.
-4. Forecast forward and generate a plan that keeps the balance above the minimum at every step.
-5. Verify deterministically — bounds, plan feasibility, schedule match, flexible-only spending changes — before writing `output.csv`.
-6. Score yourself on the solved samples, then run the full dataset.
-
-You may use any language or runtime. Python, JavaScript, and TypeScript are all reasonable choices.
-
----
-
-## Requirements
-
-Your solution must:
-
-- be runnable from the terminal
-- read the provided files from `dataset/`
-- produce a valid `output.csv` with the exact required columns in the exact required order
-- include one prediction for every `request_id` in `dataset/requests.csv`
-- not use organizer-only files or hardcoded labels
-- keep behavior deterministic where possible
-
-If you use API keys or secrets, read them from environment variables. Never hardcode secrets in the repo.
-
----
-
-## Evaluation
-
-Your `output.csv` will be compared against hidden ground-truth values.
-
-The scoring will consider:
-
-- accuracy of `amount_safe_to_pay`
-- correctness of `affordability_status`
-- correctness of `recommended_payment_method` and `payment_plan`
-- accuracy of `earliest_date_for_full_payment`
-- validity of `spending_changes_needed`
-- usefulness and consistency of `decision_explanation`
-
-### Token Usage And Cost Analysis
-
-Your `code.zip` must include one token-usage file:
-
-```text
-evaluation/usage_report.md
-```
-
-The report must cover model providers and names, model calls, input and output tokens, total and average tokens per request, estimated total and per-request cost. The reported values must correspond to the final full-dataset run that produced your `output.csv`.
-
----
-
-## Chat Transcript Logging
-
-This repo includes an [`AGENTS.md`](./AGENTS.md) file for AI coding tools. It asks compatible tools to append conversation summaries to a `log.txt` in the repository root — the same directory as `AGENTS.md`:
-
-| Platform | Path |
-|---|---|
-| macOS / Linux | `<repo root>/log.txt` |
-| Windows | `<repo root>\log.txt` |
-
-The path resolves relative to `AGENTS.md`, so it stays correct across clones, renames, and checkouts. `log.txt` is gitignored — upload it as your chat transcript at submission time. Do not paste secrets into the chat.
-
-In case, the harness you are using is not in the repo root, you can explicitly ask the agent to look for the AGENTS.md in this folder & then continue.
-
----
-
-## Submission
-
-Submit the following files as instructed by HackerRank:
-
-| File | Description |
-|---|---|
-| `code.zip` | Full runnable solution, prompts/configuration, README, and the required `evaluation/` folder |
-| `output.csv` | Predictions for every row in `dataset/requests.csv` |
-| `chat_transcript` | The `log.txt` described above, showing how you developed or used the system |
-
-Before submitting, confirm:
-
-- `output.csv` has one row per row in `dataset/requests.csv` (250 rows plus the header).
-- `output.csv` has the exact required columns in the exact required order.
-- Every `amount_safe_to_pay` satisfies `0 <= amount_safe_to_pay <= requested_amount`.
-- Every installment plan matches a supplied payment option, and every spending change targets a flexible recurring expense.
-- Your runnable code, setup instructions, and `evaluation/` folder are included in `code.zip`.

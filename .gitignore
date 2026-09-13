@@ -7,3 +7,5 @@ __pycache__/
 artifacts/
 output.csv
 code.zip
+.claude/
+.claude

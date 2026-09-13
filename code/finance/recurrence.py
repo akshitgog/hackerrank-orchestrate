@@ -180,7 +180,7 @@ def _is_next_month(previous: date, current: date) -> bool:
     current_last = calendar.monthrange(current.year, current.month)[1]
     if previous.day == previous_last and current.day == current_last:
         return True
-    return current.day == min(previous.day, current_last)
+    return abs(current.day - min(previous.day, current_last)) <= 10
 
 
 def next_date(value: date, frequency: str, anchor_day: int) -> date:

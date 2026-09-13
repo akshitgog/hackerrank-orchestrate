@@ -64,10 +64,19 @@ def main(argv: list[str] | None = None) -> int:
         usage_totals = write_usage_reports(
             list(summary.model_records),
             repo_root / "code" / "evaluation" / "usage_report.md",
-            repo_root / "code" / "evaluation" / "token_usage.md",
             run_type="final evaluation dataset",
             requests_processed=summary.processed,
         )
+        write_usage_reports(
+            list(summary.model_records),
+            artifacts_dir / "usage_report.md",
+            run_type="final evaluation dataset",
+            requests_processed=summary.processed,
+        )
+
+    # Save output copy and evaluation reports into artifacts folder
+    save_output_and_evaluate(output_path, artifacts_dir, dataset_dir, requests_path, rows)
+
     run_summary = {
         "requests_processed": summary.processed,
         "successful": summary.successful,
@@ -82,6 +91,7 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(run_summary, indent=2, default=str), encoding="utf-8"
     )
     print(f"Wrote {len(rows)} rows to {output_path}")
+    print(f"Saved evaluation artifacts to {artifacts_dir}")
     print(f"Successful requests: {summary.successful}/{summary.processed}")
     print(f"Fallback requests: {summary.fallback}/{summary.processed}")
     if debug_dir:
@@ -91,5 +101,40 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
+def save_output_and_evaluate(
+    output_path: Path,
+    artifacts_dir: Path,
+    dataset_dir: Path,
+    requests_path: Path,
+    rows: list[dict[str, str]],
+) -> None:
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    artifact_output = artifacts_dir / "output.csv"
+    if output_path.resolve() != artifact_output.resolve():
+        with artifact_output.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=OUTPUT_COLUMNS, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+
+    sample_file = dataset_dir / "sample_requests.csv"
+    rates_file = dataset_dir / "exchange_rates.csv"
+    profiles_file = dataset_dir / "financial_profiles.csv"
+
+    if requests_path.resolve() == sample_file.resolve():
+        from evaluation.main import evaluate, write_details, write_report
+        from decimal import Decimal
+        details, eval_summary = evaluate(
+            sample_file,
+            output_path,
+            profiles_file,
+            rates_file if rates_file.exists() else None,
+            tolerance=Decimal("0.01"),
+        )
+        write_details(artifacts_dir / "evaluation_details.csv", details)
+        write_report(artifacts_dir / "evaluation_report.md", eval_summary, Decimal("0.01"))
+
+
 if __name__ == "__main__":
     sys.exit(main())
+
+

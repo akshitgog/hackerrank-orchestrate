@@ -142,7 +142,14 @@ def _build_prompt(
         + ". Each fact needs source_id and action. Event-changing facts MUST have a target_event_id. "
         "Amount facts need amount and currency; date facts need YYYY-MM-DD date. Derived events (add_one_time_event, add_recurring_event) "
         "MUST have date, amount, currency, direction, category, description, status, and recurrence. "
-        "If you cannot determine all required fields (e.g. missing target event, exact date, or amount cannot be calculated), use action 'ignore'."
+        "If you cannot determine all required fields (e.g. missing target event, exact date, or amount cannot be calculated), use action 'ignore'. "
+        "CRITICAL: The events in context are ALREADY confirmed transactions in the database. "
+        "DO NOT re-emit, duplicate, or output add_one_time_event for events that already exist in the events list! "
+        "ONLY output facts when a message or image explicitly modifies, cancels, confirms, or introduces a new transaction. "
+        "Never emit an event-targeting action (e.g. classify_internal_transfer, cancel_event, amend_event_amount) unless you specify a valid target_event_id from the events list; if no matching event ID exists in the events list, use action 'ignore'. "
+        "When an image is provided for an event with amount null (such as a bill or rent receipt), look for the total, amount due, or balance due in the image and output action 'fill_event_amount' targeting that related_event_id. "
+        "NEVER emit add_one_time_event or add_recurring_event if the amount is null or missing; if a message mentions a payment without specifying an exact numeric amount, ignore that payment. "
+        "If messages or images contain no confirmed actionable changes, return {\"facts\": []}."
     )
     linked_event_ids = {
         item.related_event_id for item in [*messages, *images] if item.related_event_id
@@ -190,7 +197,11 @@ def _build_prompt(
             {
                 "image_id": item.image_id,
                 "related_event_id": item.related_event_id,
-                "instruction": "Extract only transaction facts relevant to the linked event.",
+                "instruction": (
+                    f"Extract the balance due, total, or amount due from this document and output action fill_event_amount targeting {item.related_event_id}."
+                    if item.related_event_id
+                    else "Extract only transaction facts relevant to the request."
+                ),
             }
             for item in images
         ],
@@ -239,6 +250,8 @@ def _validate_payload(
             )
         target = raw.get("target_event_id")
         if action in _ACTIONS_REQUIRING_TARGET:
+            if target is None:
+                continue
             if not isinstance(target, str) or target not in event_map:
                 raise EvidenceValidationError(
                     f"fact {index} ({action}) targets unknown event {target!r}"
@@ -306,8 +319,9 @@ def _apply_facts(
             )
         elif action == "amend_event_date":
             event = event_map[target_id]
+            new_status = "scheduled" if (fact["date"] > request.request_date and event.status == "settled") else event.status
             event_map[target_id] = event.updated(
-                settlement_date=fact["date"], evidence_sources=event.evidence_sources + (source,)
+                settlement_date=fact["date"], status=new_status, evidence_sources=event.evidence_sources + (source,)
             )
         elif action in {
             "cancel_event", "classify_internal_transfer", "classify_non_cash", "exclude_unconfirmed_credit"

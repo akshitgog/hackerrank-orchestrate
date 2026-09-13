@@ -28,7 +28,7 @@ def _cost(value: Any) -> Decimal | None:
 def write_usage_reports(
     records: list[dict[str, Any]],
     usage_report_path: Path,
-    token_usage_path: Path,
+    token_usage_path: Path | None = None,
     *,
     run_type: str,
     requests_processed: int,
@@ -121,8 +121,9 @@ def write_usage_reports(
         f"- Total reported cost: {cost_text}",
         f"- Calls with unavailable token usage: {unavailable}", "",
     ])
-    token_usage_path.parent.mkdir(parents=True, exist_ok=True)
-    token_usage_path.write_text("\n".join(token_lines), encoding="utf-8")
+    if token_usage_path is not None:
+        token_usage_path.parent.mkdir(parents=True, exist_ok=True)
+        token_usage_path.write_text("\n".join(token_lines), encoding="utf-8")
 
     average_tokens = (Decimal(totals["total"]) / requests_processed) if requests_processed else Decimal("0")
     usage_lines = [
@@ -138,7 +139,7 @@ def write_usage_reports(
         f"- Total cost: {cost_text}",
         f"- Average cost per request: {(Decimal(cost_text) / requests_processed) if cost_text != 'not reported' and requests_processed else 'not reported'}",
         f"- Calls with unavailable usage: {unavailable}", "",
-        "Detailed per-call accounting is in `token_usage.md`. Counts include only model calls made by the submitted runtime; cache hits are shown there but are not counted as provider calls.", "",
+        "Counts include only model calls made by the submitted runtime; cache hits are not counted as provider calls.", "",
     ]
     usage_report_path.parent.mkdir(parents=True, exist_ok=True)
     usage_report_path.write_text("\n".join(usage_lines), encoding="utf-8")
