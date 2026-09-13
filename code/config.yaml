@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "paths": {
+    "dataset_dir": "dataset",
+    "requests_file": "dataset/requests.csv",
+    "output_file": "output.csv",
+    "artifacts_dir": "artifacts",
+    "image_dir": "dataset/media/images"
+  },
+  "runtime": {
+    "forecast_horizon_days": 90,
+    "variable_essential_lookback_days": 90,
+    "variable_essential_bucket_days": 30,
+    "decimal_tolerance": "0.01"
+  },
+  "evidence": {
+    "enabled": true,
+    "failure_policy": "mark_invalid",
+    "cache_enabled": true,
+    "text_model": "bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "vision_model": "bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "fallback_models": [],
+    "temperature": 0,
+    "max_tokens": 1800,
+    "timeout_seconds": 60,
+    "max_retries_per_model": 4
+  },
+  "logging": {
+    "write_debug_traces": false
+  }
+}
