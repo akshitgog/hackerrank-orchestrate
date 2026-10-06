@@ -1,0 +1,502 @@
+[
+  {
+    "user_id": "synth_user_001",
+    "past_claim_count": 0,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_002",
+    "past_claim_count": 0,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_003",
+    "past_claim_count": 1,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_004",
+    "past_claim_count": 3,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_005",
+    "past_claim_count": 5,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_006",
+    "past_claim_count": 3,
+    "accept_claim": 4,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_007",
+    "past_claim_count": 1,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_008",
+    "past_claim_count": 3,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_009",
+    "past_claim_count": 1,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_010",
+    "past_claim_count": 4,
+    "accept_claim": 4,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_011",
+    "past_claim_count": 5,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_012",
+    "past_claim_count": 1,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_013",
+    "past_claim_count": 2,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_014",
+    "past_claim_count": 2,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_015",
+    "past_claim_count": 1,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_016",
+    "past_claim_count": 1,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_017",
+    "past_claim_count": 0,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_018",
+    "past_claim_count": 3,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_019",
+    "past_claim_count": 2,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_020",
+    "past_claim_count": 3,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_021",
+    "past_claim_count": 4,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_022",
+    "past_claim_count": 5,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_023",
+    "past_claim_count": 1,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_024",
+    "past_claim_count": 5,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_025",
+    "past_claim_count": 3,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_026",
+    "past_claim_count": 5,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_027",
+    "past_claim_count": 0,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_028",
+    "past_claim_count": 5,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_029",
+    "past_claim_count": 5,
+    "accept_claim": 4,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_030",
+    "past_claim_count": 4,
+    "accept_claim": 0,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "user_history_risk;manual_review_required",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_031",
+    "past_claim_count": 5,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_032",
+    "past_claim_count": 3,
+    "accept_claim": 4,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_033",
+    "past_claim_count": 0,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_034",
+    "past_claim_count": 0,
+    "accept_claim": 0,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_035",
+    "past_claim_count": 3,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_036",
+    "past_claim_count": 5,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_037",
+    "past_claim_count": 3,
+    "accept_claim": 3,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_038",
+    "past_claim_count": 2,
+    "accept_claim": 4,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_039",
+    "past_claim_count": 2,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_040",
+    "past_claim_count": 0,
+    "accept_claim": 0,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_041",
+    "past_claim_count": 4,
+    "accept_claim": 5,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_042",
+    "past_claim_count": 5,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_043",
+    "past_claim_count": 0,
+    "accept_claim": 0,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_044",
+    "past_claim_count": 1,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_045",
+    "past_claim_count": 2,
+    "accept_claim": 0,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_046",
+    "past_claim_count": 1,
+    "accept_claim": 2,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_047",
+    "past_claim_count": 5,
+    "accept_claim": 4,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_048",
+    "past_claim_count": 5,
+    "accept_claim": 0,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_049",
+    "past_claim_count": 0,
+    "accept_claim": 0,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  },
+  {
+    "user_id": "synth_user_050",
+    "past_claim_count": 0,
+    "accept_claim": 1,
+    "manual_review_claim": 0,
+    "rejected_claim": 0,
+    "last_90_days_claim_count": 1,
+    "history_flags": "none",
+    "history_summary": "Generated synthetic history."
+  }
+]

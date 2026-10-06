@@ -1,0 +1,2222 @@
+{
+  "img_tc_001_1": {
+    "user_id": "synth_user_001",
+    "image_id": "img_tc_001_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "seal",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_001_2": {
+    "user_id": "synth_user_001",
+    "image_id": "img_tc_001_2",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "seal",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_002_1": {
+    "user_id": "synth_user_002",
+    "image_id": "img_tc_002_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_002_2": {
+    "user_id": "synth_user_002",
+    "image_id": "img_tc_002_2",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_003_1": {
+    "user_id": "synth_user_003",
+    "image_id": "img_tc_003_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_003_2": {
+    "user_id": "synth_user_003",
+    "image_id": "img_tc_003_2",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_004_1": {
+    "user_id": "synth_user_004",
+    "image_id": "img_tc_004_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_004_2": {
+    "user_id": "synth_user_004",
+    "image_id": "img_tc_004_2",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_005_1": {
+    "user_id": "synth_user_005",
+    "image_id": "img_tc_005_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_005_2": {
+    "user_id": "synth_user_005",
+    "image_id": "img_tc_005_2",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_006_1": {
+    "user_id": "synth_user_006",
+    "image_id": "img_tc_006_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_006_2": {
+    "user_id": "synth_user_006",
+    "image_id": "img_tc_006_2",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_007_1": {
+    "user_id": "synth_user_007",
+    "image_id": "img_tc_007_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_007_2": {
+    "user_id": "synth_user_007",
+    "image_id": "img_tc_007_2",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_008_1": {
+    "user_id": "synth_user_008",
+    "image_id": "img_tc_008_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_008_2": {
+    "user_id": "synth_user_008",
+    "image_id": "img_tc_008_2",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_009_1": {
+    "user_id": "synth_user_009",
+    "image_id": "img_tc_009_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_009_2": {
+    "user_id": "synth_user_009",
+    "image_id": "img_tc_009_2",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_010_1": {
+    "user_id": "synth_user_010",
+    "image_id": "img_tc_010_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "poor",
+    "image_quality_strength": 2,
+    "quality_issues": [
+      "blurry_image"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_010_2": {
+    "user_id": "synth_user_010",
+    "image_id": "img_tc_010_2",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_011_1": {
+    "user_id": "synth_user_011",
+    "image_id": "img_tc_011_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "keyboard",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_012_1": {
+    "user_id": "synth_user_012",
+    "image_id": "img_tc_012_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "keyboard",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_013_1": {
+    "user_id": "synth_user_013",
+    "image_id": "img_tc_013_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_014_1": {
+    "user_id": "synth_user_014",
+    "image_id": "img_tc_014_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_015_1": {
+    "user_id": "synth_user_015",
+    "image_id": "img_tc_015_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_016_1": {
+    "user_id": "synth_user_016",
+    "image_id": "img_tc_016_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_017_1": {
+    "user_id": "synth_user_017",
+    "image_id": "img_tc_017_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "hinge",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_018_1": {
+    "user_id": "synth_user_018",
+    "image_id": "img_tc_018_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "hinge",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_019_1": {
+    "user_id": "synth_user_019",
+    "image_id": "img_tc_019_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_020_1": {
+    "user_id": "synth_user_020",
+    "image_id": "img_tc_020_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "annotation_present"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_021_1": {
+    "user_id": "synth_user_021",
+    "image_id": "img_tc_021_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "seal",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_022_1": {
+    "user_id": "synth_user_022",
+    "image_id": "img_tc_022_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_023_1": {
+    "user_id": "synth_user_023",
+    "image_id": "img_tc_023_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "windshield",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_024_1": {
+    "user_id": "synth_user_024",
+    "image_id": "img_tc_024_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "rear_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_025_1": {
+    "user_id": "synth_user_025",
+    "image_id": "img_tc_025_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_026_1": {
+    "user_id": "synth_user_026",
+    "image_id": "img_tc_026_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_027_1": {
+    "user_id": "synth_user_027",
+    "image_id": "img_tc_027_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "box",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_028_1": {
+    "user_id": "synth_user_028",
+    "image_id": "img_tc_028_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "hinge",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_029_1": {
+    "user_id": "synth_user_029",
+    "image_id": "img_tc_029_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "rear_bumper",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_030_1": {
+    "user_id": "synth_user_030",
+    "image_id": "img_tc_030_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": true,
+    "issue_strength": 4,
+    "issue_match": true,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "support",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_031_1": {
+    "user_id": "synth_user_031",
+    "image_id": "img_tc_031_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_032_1": {
+    "user_id": "synth_user_032",
+    "image_id": "img_tc_032_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_033_1": {
+    "user_id": "synth_user_033",
+    "image_id": "img_tc_033_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_034_1": {
+    "user_id": "synth_user_034",
+    "image_id": "img_tc_034_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "dent",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_035_1": {
+    "user_id": "synth_user_035",
+    "image_id": "img_tc_035_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_036_1": {
+    "user_id": "synth_user_036",
+    "image_id": "img_tc_036_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_037_1": {
+    "user_id": "synth_user_037",
+    "image_id": "img_tc_037_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_038_1": {
+    "user_id": "synth_user_038",
+    "image_id": "img_tc_038_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "dent",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_039_1": {
+    "user_id": "synth_user_039",
+    "image_id": "img_tc_039_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "dent",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_040_1": {
+    "user_id": "synth_user_040",
+    "image_id": "img_tc_040_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "door",
+    "component_visible": true,
+    "component_visibility": 5,
+    "component_match": false,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "none",
+    "support_signal": "contradict",
+    "support_strength": 5,
+    "requirement_failures": [
+      "none"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_041_1": {
+    "user_id": "synth_user_041",
+    "image_id": "img_tc_041_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_042_1": {
+    "user_id": "synth_user_042",
+    "image_id": "img_tc_042_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_043_1": {
+    "user_id": "synth_user_043",
+    "image_id": "img_tc_043_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "label",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_044_1": {
+    "user_id": "synth_user_044",
+    "image_id": "img_tc_044_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_045_1": {
+    "user_id": "synth_user_045",
+    "image_id": "img_tc_045_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "hinge",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_046_1": {
+    "user_id": "synth_user_046",
+    "image_id": "img_tc_046_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "front_bumper",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_047_1": {
+    "user_id": "synth_user_047",
+    "image_id": "img_tc_047_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "screen",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_048_1": {
+    "user_id": "synth_user_048",
+    "image_id": "img_tc_048_1",
+    "object_detected": "laptop",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "hinge",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "crack",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_049_1": {
+    "user_id": "synth_user_049",
+    "image_id": "img_tc_049_1",
+    "object_detected": "car",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "rear_bumper",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "dent",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  },
+  "img_tc_050_1": {
+    "user_id": "synth_user_050",
+    "image_id": "img_tc_050_1",
+    "object_detected": "package",
+    "object_confidence": 5,
+    "object_match": true,
+    "component_detected": "seal",
+    "component_visible": false,
+    "component_visibility": 1,
+    "component_match": true,
+    "issue_detected": "torn_packaging",
+    "issue_visible": false,
+    "issue_strength": 4,
+    "issue_match": false,
+    "issue_location_description": "Mocked",
+    "issue_severity": "medium",
+    "image_quality": "good",
+    "image_quality_strength": 5,
+    "quality_issues": [
+      "none"
+    ],
+    "authenticity_risk": "low",
+    "authenticity_flags": [
+      "none"
+    ],
+    "visibility_obstruction": "cropped",
+    "support_signal": "insufficient",
+    "support_strength": 5,
+    "requirement_failures": [
+      "claimed_component_not_visible_due_to_crop"
+    ],
+    "reasoning": {
+      "object_evidence": "Generated.",
+      "component_evidence": "Generated.",
+      "issue_evidence": "Generated."
+    }
+  }
+}
