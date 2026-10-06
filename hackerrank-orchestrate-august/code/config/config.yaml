@@ -1,0 +1,45 @@
+models:
+  # ── Swappable AI Provider Models (via LiteLLM) ──
+  # LiteLLM automatically routes requests based on the prefix:
+  #   • AWS Bedrock   : "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0", "bedrock/amazon.nova-micro-v1:0"
+  #   • Fireworks AI  : "fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct"
+  #   • Google Gemini : "gemini/gemini-2.5-flash"
+  #   • OpenAI        : "openai/gpt-4o", "openai/gpt-4o-mini"
+  #   • Deepgram      : "deepgram/nova-3"
+  #
+  # Active configuration (auto-overridden by settings.py if other API keys are present in .env):
+  llm_model: "bedrock/us.amazon.nova-micro-v1:0"    # Text semantic classification (cheapest text model)
+  vlm_model: "bedrock/us.amazon.nova-lite-v1:0"     # Image OCR / poster inspection
+  stt_model: "deepgram/nova-3"                   # Voice note transcription (fast multilingual STT)
+
+execution:
+  llm_max_retries: 5      # Increased retry rate for bedrock rate limits
+  vlm_max_retries: 3
+  stt_max_retries: 1      # Low retry rate to fail-fast on slow audio processing
+  max_concurrency: 3      # Reduced to avoid Bedrock throttling
+  timeout_seconds: 10
+  temperature: 0          # Deterministic classification — no sampling randomness
+
+media:
+  # It is the user's responsibility to update this resolution based on their chosen VLM's constraints (e.g., 1024, 1120).
+  image_long_edge_px: 1120
+
+paths:
+  dataset_dir: "dataset"
+  messages_file: "messages.csv"
+  output_file: "code/evaluation/output.csv"
+  cache_dir: "code/.cache"
+
+personalization:
+  low_engagement_threshold: 0.25
+
+confidence:
+  gate_scam: 0.95
+  gate_promo_optout: 0.95
+  gate_emergency: 0.95
+  gate_actionable: 0.90
+  gate_dnd_digest: 0.85
+  gate_low_engagement: 0.80
+  default: 0.70
+  media_failure_penalty: 0.15
+  fallback_default: 0.50
