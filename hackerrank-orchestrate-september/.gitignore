@@ -1,0 +1,11 @@
+.env
+code/.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+artifacts/
+output.csv
+code.zip
+.claude/
+.claude
