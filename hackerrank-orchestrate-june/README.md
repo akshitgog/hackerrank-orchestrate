@@ -1,11 +1,8 @@
 # Multi-Modal Evidence Review Engine
 
-Automated damage-claim verification for **cars**, **laptops** and **packages**, built for the HackerRank Orchestrate hackathon (June 2026).
+Automated damage-claim verification for cars, laptops and packages, built for the HackerRank Orchestrate hackathon (June 2026).
 
 It reads a customer's claim text, inspects every submitted image with a vision-language model, checks the customer's claim history, and returns a structured, explainable decision, with all business rules enforced in plain Python rather than by an LLM.
-
-![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)
-![Accuracy](https://img.shields.io/badge/sample%20accuracy-65.6%25-orange.svg)
 
 ---
 
@@ -28,7 +25,7 @@ flowchart LR
 |---|---|---|
 | 1. Extractor | Turn the claim text into `{object, object_part, issue_type}` | Amazon Nova Micro |
 | 2. Visual assessor | Judge each image: supports, contradicts or insufficient, plus quality, severity and risk flags | Claude Sonnet (Bedrock) |
-| 3. Decision engine | Aggregate images, apply risk and escalation rules | None (deterministic) |
+| 3. Decision engine | Aggregate images, apply risk and escalation rules | None (deterministic Python) |
 | 4. Explanation writer | Write two grounded sentences for the audit trail | Llama 3.3 70B |
 
 Models are swappable in `config/providers.yaml`. Structured output is enforced with Pydantic and Instructor, via LiteLLM.
@@ -38,30 +35,27 @@ Models are swappable in `config/providers.yaml`. Structured output is enforced w
 ## Decision rules
 
 **Image aggregation**
-- Contradiction beats support. If any usable image clearly contradicts the claim, the claim is `contradicted`.
+- Contradiction beats support: if any usable image clearly contradicts the claim, the claim is `contradicted`.
 - Weak support is discarded: `support_strength < 4` with `acceptable` or `poor` image quality does not count.
 - Hallucination guard: if the VLM returns identical text for object, component and issue evidence, that image is ignored.
 
-**Customer risk** (`RiskEngine`)
+**Customer risk (`RiskEngine`)**
 - 3 or more claims in the last 90 days, or 2 or more past rejections, raises `user_history_risk`.
 
-**Escalation** (`DecisionEngine`)
+**Escalation (`DecisionEngine`)**
 - A `supported` or `not_enough_information` claim with `user_history_risk` becomes `manual_review_required`.
-- Clear contradictions are auto-rejected and are **not** escalated, so reviewers don't waste time on obvious fraud.
+- Clear contradictions are auto-rejected and are not escalated, so reviewers do not waste time on obvious fraud.
 
 ---
 
 ## Quick start
 
 ```bash
-git clone git@github.com:interviewstreet/hackerrank-orchestrate-june26.git
-cd hackerrank-orchestrate-june26
-
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-cp .env.example .env             # add your AWS / OpenAI / Anthropic keys
+cp .env.example .env             # add your AWS credentials
 ```
 
 | Mode | Command | Notes |
@@ -75,20 +69,18 @@ cp .env.example .env             # add your AWS / OpenAI / Anthropic keys
 Score a test run:
 
 ```bash
-python code/evaluation/compare.py \
-  --pred code/evaluation/test_output.csv \
-  --true dataset/test_claim_output.csv
+python code/evaluation/compare.py --pred code/evaluation/test_output.csv --true dataset/test_claim_output.csv
 ```
 
 ---
 
 ## Configuration
 
-**`config/providers.yaml`** sets the model, concurrency and retries for each layer:
+`config/providers.yaml` sets the model, concurrency and retries for each layer:
 
 ```yaml
 vlm:
-  model: bedrock/us.anthropic.claude-sonnet-4-6
+  model: bedrock/arn:aws:bedrock:us-east-1:<ACCOUNT_ID>:inference-profile/us.anthropic.claude-sonnet-4-6
   concurrency: 2
   max_retries: 1
 
@@ -103,15 +95,13 @@ extractor:
 
 To switch provider, change the model string (for example `openai/gpt-4o`). Use `model: mock` to run offline.
 
-**`config/dataset.yaml`** maps file paths for the `production`, `test` and `mock` environments.
-
 ---
 
 ## Results
 
 Evaluated on 20 labeled sample claims (8 fields each, 160 checks in total).
 
-**Overall: 65.6% (105 / 160)**
+Overall: 65.6% (105 / 160)
 
 | Field | Accuracy |
 |---|---:|
@@ -130,16 +120,6 @@ Evaluated on 20 labeled sample claims (8 fields each, 160 checks in total).
 | Car | 62.5% |
 | Package | 60.4% |
 
-**Known weak spots:** severity grading and multi-label risk flags are the main areas to improve.
-
----
-
-## Cost and speed
-
-- Roughly **$0.01 per claim**, dominated by the VLM call (about $0.0055 per image).
-- About **4 seconds per claim**; the full production set runs in a few minutes for under $0.50.
-- VLM calls are capped by an `asyncio.Semaphore` (default 2) to avoid rate-limit errors.
-
 ---
 
 ## Output format
@@ -148,11 +128,7 @@ Evaluated on 20 labeled sample claims (8 fields each, 160 checks in total).
 
 `user_id`, `image_paths`, `user_claim`, `claim_object`, `evidence_standard_met`, `evidence_standard_met_reason`, `risk_flags`, `issue_type`, `object_part`, `claim_status`, `claim_status_justification`, `supporting_image_ids`, `valid_image`, `severity`
 
-- `claim_status`: `supported` | `contradicted` | `not_enough_information`
-- `severity`: `none` | `low` | `medium` | `high` | `unknown`
-- List fields are semicolon-separated, or `none`.
-
-Full enums and definitions are in [`problem_statement.md`](problem_statement.md).
+Full enums and definitions are in `problem_statement.md`.
 
 ---
 
@@ -181,11 +157,3 @@ planning/           design notes and business rules
 pytest code/testing
 python code/main.py --env mock
 ```
-
----
-
-## Submission
-
-1. `code.zip` with the solution, prompts, configs, tests and `evaluation/`
-2. `output.csv` for `dataset/claims.csv`
-3. Chat transcript logs per [`AGENTS.md`](AGENTS.md)

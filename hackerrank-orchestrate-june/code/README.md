@@ -142,7 +142,7 @@ python code/evaluation/compare.py --pred code/evaluation/test_output.csv --true 
 
 ## Modifying Models & Providers
 
-Model settings are fully decoupled into [`config/providers.yaml`](file:///C:/Users/Galactus/OneDrive/Desktop/Hacker_rank/hackerrank_Orchesteate_june/config/providers.yaml). No code changes in `code/` are required to switch providers:
+Model settings are fully decoupled into [`config/providers.yaml`](../config/providers.yaml). No code changes in `code/` are required to switch providers:
 * Bedrock: `bedrock/arn:aws:bedrock:...` or `bedrock/anthropic.claude-3-5-sonnet...`
 * OpenAI: `openai/gpt-4o`, `openai/gpt-4o-mini`
 * Anthropic: `anthropic/claude-3-5-sonnet-20240620`

@@ -1,7 +1,7 @@
 vlm:
   # High Engine: Elite vision precision
   # To change provider, simply change the prefix (e.g., 'openai/gpt-4o' or 'gemini/gemini-1.5-pro')
-  model: bedrock/arn:aws:bedrock:us-east-1:557904961273:inference-profile/us.anthropic.claude-sonnet-4-6
+  model: bedrock/arn:aws:bedrock:us-east-1:<ACCOUNT_ID>:inference-profile/us.anthropic.claude-sonnet-4-6
   concurrency: 2
   sleep_seconds: 0
   max_retries: 1

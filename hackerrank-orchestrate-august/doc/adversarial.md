@@ -1,6 +1,6 @@
 # THREAT_ANALYSIS.md — Comprehensive Threat Model, Failure Modes & Mitigation Strategy
 
-This document defines the formal threat model for the HackerRank Orchestrate Message Notification Router, adhering to the Principal Engineering principles in [`june_edition_learning.md`](file:///C:/Users/Galactus/OneDrive/Desktop/orches/planning/june_edition_learning.md) and adapting the winning Rank 3 architectural design principles.
+This document defines the formal threat model for the HackerRank Orchestrate Message Notification Router, adhering to the Principal Engineering principles in [`june_edition_learning.md`](../../hackerrank-orchestrate-june/planning/june_edition_learning.md) and adapting the winning Rank 3 architectural design principles.
 
 ---
 

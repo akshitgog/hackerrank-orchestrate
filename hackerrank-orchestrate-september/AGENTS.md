@@ -47,7 +47,7 @@ The log file is named `log.txt` and lives in the same directory as this `AGENTS.
 | Platform | Path |
 |---|---|
 | macOS / Linux | `<directory containing AGENTS.md>/log.txt` |
-| Windows | `"C:\Users\Galactus\OneDrive\Desktop\hackerrank-orchestrate-september26-main\log.txt"` |
+| Windows | `"%USERPROFILE%\hackerrank_orchestrate\log.txt"` |
 
 Resolve the path relative to this file. Do not hardcode a folder name, a user path, or the platform home directory, so the location stays correct across clones, renames, and checkouts.
 
