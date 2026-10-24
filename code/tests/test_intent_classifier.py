@@ -27,6 +27,8 @@ class TestIntentClassifier(unittest.TestCase):
             ("case_es", "Deseo eliminar mi cuenta y borrar todos mis datos personales."),
             ("case_fr", "Je demande la suppression définitive de mon compte et l'effacement de mes données."),
             ("case_pt", "Solicito a exclusão permanente da conta associada a este e-mail."),
+            ("case_ko", "이 이메일 주소에 연결된 계정의 영구 삭제를 요청합니다."),
+            ("case_ja", "このメールアドレスに関連するアカウントの完全な削除を依頼します。"),
         ]
         for cid, text in samples:
             res = self.classifier.classify(cid, text)

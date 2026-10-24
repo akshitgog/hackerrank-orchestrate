@@ -1,33 +1,29 @@
 # AI Deletion Audit Agent Configuration
 
 models:
-  # Primary Reasoning & Multimodal VLM Engine
-  # Fireworks AI (Llama-3.2-Vision / Qwen2.5-VL / Llama-3.3-70B), OpenAI (GPT-4o), or Gemini
+  # Primary Reasoning & Multimodal VLM Engine (Uses your Fireworks account)
   llm_engine:
-    enabled: false # Set to true when API key is configured in code/.env
-    # Fireworks AI VLM options:
-    #   - "fireworks_ai/accounts/fireworks/models/llama-v3p2-11b-vision-instruct" (Fast VLM)
-    #   - "fireworks_ai/accounts/fireworks/models/qwen2-vl-72b-instruct" (SOTA OCR & Screenshot VLM)
-    #   - "fireworks_ai/accounts/fireworks/models/llama-v3p3-70b-instruct" (Fast Reasoning)
-    # OpenAI: "gpt-4o"
-    # Gemini: "gemini/gemini-2.5-flash"
-    model: "fireworks_ai/accounts/fireworks/models/llama-v3p2-11b-vision-instruct"
+    enabled: true # Set to true once FIREWORKS_API_KEY is in code/.env
+
+    model: "accounts/fireworks/models/glm-5p3-flash"
     temperature: 0.0
     timeout_seconds: 25
     retries: 3
     initial_backoff: 1.0
 
-  # TypeSafe AI Jev Decision Model
-  # Used TOGETHER WITH VLM/LLM to evaluate calibrated structured probabilistic decisions
-  jev_decision_model:
-    enabled: false # Set to true when TYPESAFE_JEV_API_KEY is configured in code/.env
-    model: "typesafe-jev/jev-decision-v1"
-    timeout_seconds: 15
+  # Decision Model (Replaced TypeSafe Jev with your isolated local service model)
+  # Runs on your local RTX 3050 via http://127.0.0.1:8000
+  decision_model:
+    enabled: true
+    provider: "local" # Indicates your self-hosted FastAPI endpoint
+    endpoint: "http://127.0.0.1:8000/v1/decisions"
+    model: "local-decision-v1"
+    timeout_seconds: 10
     retries: 3
     threshold: 0.80
 
 thresholds:
-  intent_decision: 0.80
+  intent_decision: 0.65
   grid_search_candidates: [0.50, 0.60, 0.65, 0.70, 0.80, 0.85, 0.90, 0.95]
 
 paths:

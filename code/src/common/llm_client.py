@@ -89,6 +89,10 @@ class RobustLLMClient:
         Returns:
             Completion text string or None if all retries failed.
         """
+        # Auto-format fireworks_ai provider prefix if user passed accounts/fireworks/
+        if model.startswith("accounts/fireworks/"):
+            model = f"fireworks_ai/{model}"
+
         delay = initial_backoff
         last_exception = None
 

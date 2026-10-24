@@ -9,6 +9,11 @@ from typing import Optional
 import pandas as pd
 
 from code.src.logging_agent.models import UserIdentityProfile
+from code.src.logging_agent.normalizer import (
+    normalize_text_nfc,
+    strip_accents,
+    get_name_variants,
+)
 
 
 class IdentityTracker:
@@ -146,6 +151,11 @@ class IdentityTracker:
                 if new_val:
                     all_names.add(new_val)
 
+        # Build complete alias search index containing accented and unaccented variants
+        name_variants: set[str] = set()
+        for n in all_names:
+            name_variants.update(get_name_variants(n))
+
         # Guarantee that all emails in all_emails have their corresponding SHA256 hashes
         for e in list(all_emails):
             if e:
@@ -156,6 +166,7 @@ class IdentityTracker:
             user_id=user_id,
             primary_name=primary_name,
             all_names=frozenset(all_names),
+            name_variants=frozenset(name_variants),
             primary_email=primary_email,
             all_emails=frozenset(all_emails),
             primary_phone=primary_phone,

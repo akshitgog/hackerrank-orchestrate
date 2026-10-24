@@ -12,6 +12,7 @@ from code.src.logging_agent.models import UserIdentityProfile
 from code.src.audit_agent.models import AuditFinding, AuditVerificationProof, AuditResult
 from code.src.audit_agent.policy import PolicyEngine
 from code.src.audit_agent.multimodal_cache import LazyMultimodalCache
+from code.src.audit_agent.db import get_audit_db_connection
 
 
 class AuditScanner:
@@ -174,14 +175,16 @@ class AuditScanner:
     def _scan_sql_snapshots(
         self,
         valid_files: pd.DataFrame,
-        emails: set[str],
-        user_id: str,
+        profile: UserIdentityProfile,
     ) -> tuple[list[AuditFinding], list[AuditVerificationProof]]:
-        """Scan SQL database captures for residual records."""
+        """Scan SQL database captures for residual records using Unicode and accent-insensitive matching."""
         findings: list[AuditFinding] = []
         verifications: list[AuditVerificationProof] = []
 
         sql_files = valid_files[valid_files["file_path"].str.endswith(".sql")]
+        user_id = profile.user_id
+        emails = profile.all_emails
+        name_variants = profile.name_variants
 
         for _, row in sql_files.iterrows():
             fid = str(row["file_id"])
@@ -194,7 +197,11 @@ class AuditScanner:
                     content = f.read()
 
                 # Check failover replica for residual account
-                if user_id in content or any(e in content.lower() for e in emails):
+                if (
+                    user_id in content
+                    or any(e in content.lower() for e in emails)
+                    or any(nv in content.lower() for nv in name_variants)
+                ):
                     if "customer_profiles_failover_replica" in content:
                         m = re.search(r"VALUES\('(account_\d+)','" + user_id + r"'", content)
                         if m:
@@ -241,7 +248,7 @@ class AuditScanner:
         verifications.extend(txt_verifications)
 
         # 3. Scan SQL captures
-        sql_findings, sql_verifications = self._scan_sql_snapshots(valid_files, all_emails, user_id)
+        sql_findings, sql_verifications = self._scan_sql_snapshots(valid_files, profile)
         findings.extend(sql_findings)
         verifications.extend(sql_verifications)
 

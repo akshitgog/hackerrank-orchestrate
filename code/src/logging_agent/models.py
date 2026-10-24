@@ -13,6 +13,7 @@ class UserIdentityProfile:
     user_id: str
     primary_name: str
     all_names: frozenset[str] = field(default_factory=frozenset)
+    name_variants: frozenset[str] = field(default_factory=frozenset)
     primary_email: str = ""
     all_emails: frozenset[str] = field(default_factory=frozenset)
     primary_phone: str = ""

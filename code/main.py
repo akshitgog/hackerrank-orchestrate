@@ -70,19 +70,21 @@ def main() -> None:
     print(f"Loaded config from {args.config}")
     print(f"Intent Threshold: {threshold}")
 
-    # Initialize Agents across all phases: GPT-4o + TypeSafe AI Jev Tandem
-    gpt_cfg = config.get("models", {}).get("llm_engine", {})
-    jev_cfg = config.get("models", {}).get("jev_decision_model", {})
+    # Initialize Agents: VLM / LLM Engine + Decision Model (Local or Jev)
+    llm_cfg = config.get("models", {}).get("llm_engine", {})
+    decision_cfg = config.get("models", {}).get("decision_model", {})
 
-    gpt_model = gpt_cfg.get("model") if gpt_cfg.get("enabled", False) else None
-    jev_model = jev_cfg.get("model") if jev_cfg.get("enabled", False) else None
+    llm_model = llm_cfg.get("model") if llm_cfg.get("enabled", False) else None
+    decision_endpoint = None
+    if decision_cfg.get("enabled", False) and decision_cfg.get("provider") == "local":
+        decision_endpoint = decision_cfg.get("endpoint", "http://127.0.0.1:8000/v1/decisions")
 
     classifier = IntentClassifier(
         threshold=threshold,
-        gpt_model=gpt_model,
-        jev_model=jev_model,
-        timeout=int(gpt_cfg.get("timeout_seconds", 25)),
-        max_retries=int(gpt_cfg.get("retries", 3)),
+        llm_model=llm_model,
+        decision_endpoint=decision_endpoint,
+        timeout=int(llm_cfg.get("timeout_seconds", 25)),
+        max_retries=int(llm_cfg.get("retries", 3)),
     )
     tracker = IdentityTracker(
         identities_path="dataset/user_identities.csv",
