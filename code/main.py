@@ -71,7 +71,14 @@ def main() -> None:
     print(f"Intent Threshold: {threshold}")
 
     # Initialize Agents across all phases
-    classifier = IntentClassifier(threshold=threshold)
+    intent_cfg = config.get("models", {}).get("intent_classifier", {})
+    intent_model = intent_cfg.get("model") if intent_cfg.get("enabled", False) else None
+    classifier = IntentClassifier(
+        threshold=threshold,
+        model_name=intent_model,
+        timeout=int(intent_cfg.get("timeout_seconds", 15)),
+        max_retries=int(intent_cfg.get("retries", 3)),
+    )
     tracker = IdentityTracker(
         identities_path="dataset/user_identities.csv",
         audit_log_path="dataset/user_audit_log.csv",

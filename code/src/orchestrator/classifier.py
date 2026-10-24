@@ -2,12 +2,14 @@
 
 Determines whether a customer's request authorizes personal data deletion or
 specifies a non-deletion action (access, export, marketing opt-out, correction).
-Thresholds and provider configurations are loaded dynamically from config.yaml.
+Supports any LiteLLM provider with 3 exponential backoff retries and automatic fallback.
 """
 
+import json
 import re
 from typing import Any, Optional
 from code.src.orchestrator.models import IntentClassificationResult
+from code.src.common.llm_client import RobustLLMClient
 
 
 NON_DELETION_PATTERNS = [
@@ -54,22 +56,96 @@ DELETION_PATTERNS = [
 class IntentClassifier:
     """Classifies customer request_text to determine deletion authorization."""
 
-    def __init__(self, threshold: float = 0.80) -> None:
+    def __init__(
+        self,
+        threshold: float = 0.80,
+        model_name: Optional[str] = None,
+        timeout: int = 15,
+        max_retries: int = 3,
+    ) -> None:
         self.threshold = threshold
+        self.model_name = model_name
+        self.timeout = timeout
+        self.max_retries = max_retries
+
+    def _classify_with_llm(self, case_id: str, request_text: str) -> Optional[IntentClassificationResult]:
+        """Attempt classification via LiteLLM with 3 retries and structured JSON output."""
+        if not self.model_name:
+            return None
+
+        prompt = (
+            "You are a GDPR/CCPA privacy intake classifier. Analyze the customer's request and determine if "
+            "it authorizes account/data deletion, or if it is a non-deletion request (access, export, marketing opt-out, correction).\n"
+            "Return valid JSON ONLY with these exact keys:\n"
+            "{\n"
+            '  "is_deletion_authorized": true/false,\n'
+            '  "confidence": 0.0 to 1.0,\n'
+            '  "intent_category": "ACCOUNT_DELETION" or "DATA_EXPORT" or "ACCESS_REQUEST" or "MARKETING_OPT_OUT" or "RECTIFICATION_CORRECTION",\n'
+            '  "rationale": "short explanation"\n'
+            "}\n\n"
+            f"Customer Request:\n\"{request_text}\""
+        )
+
+        messages = [
+            {"role": "system", "content": "You are a precise privacy legal classifier. Respond in valid JSON."},
+            {"role": "user", "content": prompt},
+        ]
+
+        raw_response = RobustLLMClient.complete(
+            model=self.model_name,
+            messages=messages,
+            temperature=0.0,
+            timeout=self.timeout,
+            max_retries=self.max_retries,
+        )
+
+        if not raw_response:
+            return None
+
+        try:
+            # Clean markdown code blocks if wrapped
+            clean_json = raw_response
+            if "```" in clean_json:
+                clean_json = re.sub(r"^```(?:json)?\n?", "", clean_json.strip())
+                clean_json = re.sub(r"\n?```$", "", clean_json.strip())
+
+            parsed = json.loads(clean_json)
+            is_auth = bool(parsed.get("is_deletion_authorized", False))
+            conf = float(parsed.get("confidence", 0.85))
+            cat = str(parsed.get("intent_category", "ACCOUNT_DELETION" if is_auth else "NON_DELETION"))
+            rat = str(parsed.get("rationale", "Classified by AI model"))
+
+            # Align decision with confidence threshold
+            if is_auth and conf < self.threshold:
+                is_auth = False
+
+            return IntentClassificationResult(
+                case_id=case_id,
+                request_text=request_text,
+                is_deletion_authorized=is_auth,
+                confidence=conf,
+                intent_category=cat,
+                rationale=rat,
+            )
+        except Exception:
+            return None
 
     def classify(self, case_id: str, request_text: str) -> IntentClassificationResult:
         """Classify a request and determine if deletion is authorized.
 
-        Args:
-            case_id: Request case identifier.
-            request_text: Natural language customer communication.
-
-        Returns:
-            IntentClassificationResult with confidence score and decision.
+        Tries LiteLLM with 3 retries first if configured. If unavailable or fails,
+        falls back gracefully to deterministic pattern recognition.
         """
+        # 1. Attempt LLM classification if configured
+        if self.model_name:
+            llm_result = self._classify_with_llm(case_id, request_text)
+            if llm_result:
+                return llm_result
+
+        # 2. Deterministic Fallback Engine
         text_clean = request_text.strip().lower()
 
-        # 1. Detect explicit non-deletion signals & restrictions
+        # A. Detect explicit non-deletion signals & restrictions
         for pat in NON_DELETION_PATTERNS:
             if re.search(pat, text_clean):
                 category = "NON_DELETION"
@@ -91,7 +167,7 @@ class IntentClassifier:
                     rationale=f"Explicit non-deletion request detected matching pattern: {pat}",
                 )
 
-        # 2. Multilingual deletion authorization markers
+        # B. Multilingual deletion authorization markers
         matched_deletion = [pat for pat in DELETION_PATTERNS if re.search(pat, text_clean)]
         if matched_deletion:
             confidence = 0.95
@@ -105,9 +181,7 @@ class IntentClassifier:
                 rationale=f"Deletion authorized via patterns: {matched_deletion}",
             )
 
-        # 3. Default fallback for non-empty customer requests in deletion dataset
-        # In the context of a deletion portal, general account requests without non-deletion
-        # restriction default to deletion authorization
+        # C. Default fallback
         confidence = 0.85
         is_authorized = confidence >= self.threshold
         return IntentClassificationResult(
