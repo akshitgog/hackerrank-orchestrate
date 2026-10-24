@@ -113,6 +113,7 @@ def main() -> None:
     for idx, row in requests_df.iterrows():
         case_id = str(row["case_id"])
         email = str(row["email"])
+        requested_at = str(row.get("requested_at", ""))
         audit_at = str(row["audit_at"])
         request_text = str(row.get("request_text", ""))
 
@@ -145,7 +146,7 @@ def main() -> None:
             continue
 
         # Phase 2: Audit Scanner
-        audit_res = scanner.audit_case(case_id, profile, audit_at)
+        audit_res = scanner.audit_case(case_id, profile, audit_at, requested_at=requested_at)
         res_valid, audit_errs = audit_guardrail.validate(audit_res)
         if not res_valid:
             print(f"[!] Audit guardrail error for {case_id}: {audit_errs}")
