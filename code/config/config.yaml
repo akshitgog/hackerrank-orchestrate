@@ -1,0 +1,28 @@
+# AI Deletion Audit Agent Configuration
+
+models:
+  intent_classifier:
+    provider: "typesafe_jev" # Options: typesafe_jev, gemini, openai
+    model_name: "jev-decision-v1"
+    temperature: 0.0
+    timeout_seconds: 15
+
+thresholds:
+  intent_decision: 0.80
+  grid_search_candidates: [0.50, 0.70, 0.80, 0.85, 0.90, 0.95]
+
+paths:
+  dataset_dir: "dataset"
+  evidence_dir: "dataset/evidence"
+  cache_dir: "cache"
+  output_csv: "output.csv"
+  evaluation_history: "code/evaluation/evaluation_history.jsonl"
+
+orchestrator:
+  max_guardrail_retries: 3
+  stop_on_error: false
+  log_level: "INFO"
+
+caching:
+  multimodal_cache_file: "cache/multimodal_cache.json"
+  lazy_loading: true
