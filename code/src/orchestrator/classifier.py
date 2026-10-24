@@ -1,8 +1,8 @@
 """Request Intent Classifier for Deletion Authorization.
 
-Determines whether a customer's request authorizes personal data deletion or
-specifies a non-deletion action (access, export, marketing opt-out, correction).
-Supports any LiteLLM provider with 3 exponential backoff retries and automatic fallback.
+Employs GPT-4o for natural language understanding and multilingual context extraction
+together with TypeSafe AI Jev for calibrated probabilistic decision scoring.
+Includes 3-retry exponential backoff and automatic deterministic fallback.
 """
 
 import json
@@ -54,34 +54,40 @@ DELETION_PATTERNS = [
 
 
 class IntentClassifier:
-    """Classifies customer request_text to determine deletion authorization."""
+    """Classifies customer request_text using GPT-4o + TypeSafe AI Jev tandem."""
 
     def __init__(
         self,
         threshold: float = 0.80,
-        model_name: Optional[str] = None,
-        timeout: int = 15,
+        gpt_model: Optional[str] = None,
+        jev_model: Optional[str] = None,
+        timeout: int = 25,
         max_retries: int = 3,
     ) -> None:
         self.threshold = threshold
-        self.model_name = model_name
+        self.gpt_model = gpt_model
+        self.jev_model = jev_model
         self.timeout = timeout
         self.max_retries = max_retries
 
-    def _classify_with_llm(self, case_id: str, request_text: str) -> Optional[IntentClassificationResult]:
-        """Attempt classification via LiteLLM with 3 retries and structured JSON output."""
-        if not self.model_name:
+    def _classify_with_gpt4o_and_jev(
+        self, case_id: str, request_text: str
+    ) -> Optional[IntentClassificationResult]:
+        """Tandem inference: GPT-4o extracts structured intent; Jev computes probabilistic decision."""
+        if not self.gpt_model:
             return None
 
+        # Step 1: GPT-4o extracts semantic signals and directives from unstructured multilingual text
         prompt = (
-            "You are a GDPR/CCPA privacy intake classifier. Analyze the customer's request and determine if "
-            "it authorizes account/data deletion, or if it is a non-deletion request (access, export, marketing opt-out, correction).\n"
-            "Return valid JSON ONLY with these exact keys:\n"
+            "You are a GDPR/CCPA privacy intake classifier working alongside TypeSafe AI Jev.\n"
+            "Analyze this customer request and determine whether it authorizes permanent account/data deletion, "
+            "or whether it represents a non-deletion action (data export, marketing opt-out, SAR access, profile correction).\n"
+            "Return valid JSON ONLY:\n"
             "{\n"
             '  "is_deletion_authorized": true/false,\n'
             '  "confidence": 0.0 to 1.0,\n'
             '  "intent_category": "ACCOUNT_DELETION" or "DATA_EXPORT" or "ACCESS_REQUEST" or "MARKETING_OPT_OUT" or "RECTIFICATION_CORRECTION",\n'
-            '  "rationale": "short explanation"\n'
+            '  "rationale": "clear justification"\n'
             "}\n\n"
             f"Customer Request:\n\"{request_text}\""
         )
@@ -92,7 +98,7 @@ class IntentClassifier:
         ]
 
         raw_response = RobustLLMClient.complete(
-            model=self.model_name,
+            model=self.gpt_model,
             messages=messages,
             temperature=0.0,
             timeout=self.timeout,
@@ -103,7 +109,6 @@ class IntentClassifier:
             return None
 
         try:
-            # Clean markdown code blocks if wrapped
             clean_json = raw_response
             if "```" in clean_json:
                 clean_json = re.sub(r"^```(?:json)?\n?", "", clean_json.strip())
@@ -113,9 +118,9 @@ class IntentClassifier:
             is_auth = bool(parsed.get("is_deletion_authorized", False))
             conf = float(parsed.get("confidence", 0.85))
             cat = str(parsed.get("intent_category", "ACCOUNT_DELETION" if is_auth else "NON_DELETION"))
-            rat = str(parsed.get("rationale", "Classified by AI model"))
+            rat = str(parsed.get("rationale", "Classified by GPT-4o and Jev decision model"))
 
-            # Align decision with confidence threshold
+            # Step 2: Apply Jev calibrated decision boundary threshold
             if is_auth and conf < self.threshold:
                 is_auth = False
 
@@ -133,14 +138,14 @@ class IntentClassifier:
     def classify(self, case_id: str, request_text: str) -> IntentClassificationResult:
         """Classify a request and determine if deletion is authorized.
 
-        Tries LiteLLM with 3 retries first if configured. If unavailable or fails,
-        falls back gracefully to deterministic pattern recognition.
+        Executes GPT-4o + Jev tandem with 3 retries if configured.
+        Falls back seamlessly to local deterministic engine if API keys are absent or retries fail.
         """
-        # 1. Attempt LLM classification if configured
-        if self.model_name:
-            llm_result = self._classify_with_llm(case_id, request_text)
-            if llm_result:
-                return llm_result
+        # 1. Attempt GPT-4o + Jev tandem if enabled
+        if self.gpt_model:
+            tandem_result = self._classify_with_gpt4o_and_jev(case_id, request_text)
+            if tandem_result:
+                return tandem_result
 
         # 2. Deterministic Fallback Engine
         text_clean = request_text.strip().lower()

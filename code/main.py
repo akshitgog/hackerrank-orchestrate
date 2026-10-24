@@ -70,14 +70,19 @@ def main() -> None:
     print(f"Loaded config from {args.config}")
     print(f"Intent Threshold: {threshold}")
 
-    # Initialize Agents across all phases
-    intent_cfg = config.get("models", {}).get("intent_classifier", {})
-    intent_model = intent_cfg.get("model") if intent_cfg.get("enabled", False) else None
+    # Initialize Agents across all phases: GPT-4o + TypeSafe AI Jev Tandem
+    gpt_cfg = config.get("models", {}).get("llm_engine", {})
+    jev_cfg = config.get("models", {}).get("jev_decision_model", {})
+
+    gpt_model = gpt_cfg.get("model") if gpt_cfg.get("enabled", False) else None
+    jev_model = jev_cfg.get("model") if jev_cfg.get("enabled", False) else None
+
     classifier = IntentClassifier(
         threshold=threshold,
-        model_name=intent_model,
-        timeout=int(intent_cfg.get("timeout_seconds", 15)),
-        max_retries=int(intent_cfg.get("retries", 3)),
+        gpt_model=gpt_model,
+        jev_model=jev_model,
+        timeout=int(gpt_cfg.get("timeout_seconds", 25)),
+        max_retries=int(gpt_cfg.get("retries", 3)),
     )
     tracker = IdentityTracker(
         identities_path="dataset/user_identities.csv",

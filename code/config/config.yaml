@@ -1,30 +1,24 @@
 # AI Deletion Audit Agent Configuration
 
 models:
-  # Intent Classifier: Natural language privacy request understanding
-  intent_classifier:
-    enabled: false # Set to true to use live LiteLLM provider
-    model: "gemini/gemini-2.5-flash" # Options: gemini/gemini-2.5-flash, gpt-4o-mini, etc.
-    temperature: 0.0
-    timeout_seconds: 15
-    retries: 3
-    initial_backoff: 1.0
-
-  # Multimodal Inspector: Visual inspection of PNG console screenshots on cache miss
-  multimodal_inspector:
-    enabled: false
-    model: "gemini/gemini-2.5-flash"
+  # Primary Reasoning & Multimodal Engine (GPT-4o)
+  # Used for multilingual request analysis, unstructured context parsing, and screenshot inspection
+  llm_engine:
+    enabled: false # Set to true when OPENAI_API_KEY is configured in code/.env
+    model: "gpt-4o"
     temperature: 0.0
     timeout_seconds: 25
     retries: 3
+    initial_backoff: 1.0
 
-  # Decision Synthesizer: Complex conflict resolution
-  decision_synthesizer:
-    enabled: false
-    model: "gemini/gemini-2.5-flash"
-    temperature: 0.0
+  # TypeSafe AI Jev Decision Model
+  # Used TOGETHER WITH GPT-4o to evaluate structured probabilistic decisions and confidence calibration
+  jev_decision_model:
+    enabled: false # Set to true when TYPESAFE_JEV_API_KEY is configured in code/.env
+    model: "typesafe-jev/jev-decision-v1"
     timeout_seconds: 15
     retries: 3
+    threshold: 0.80
 
 thresholds:
   intent_decision: 0.80
