@@ -368,28 +368,122 @@ class AuditScanner:
 
         return findings, verifications
 
-    def _scan_documents(
+    def _scan_multimodal_evidence(
         self,
         valid_files: pd.DataFrame,
-        emails: set[str],
-        name_variants: set[str],
+        profile: UserIdentityProfile,
+        requested_at: Optional[str] = None,
     ) -> tuple[list[AuditFinding], list[AuditVerificationProof]]:
-        """Scan PDF documents (such as delivery correction attachments)."""
+        """Scan cached PDF documents and console UI screenshots dynamically."""
         findings: list[AuditFinding] = []
         verifications: list[AuditVerificationProof] = []
 
-        doc_files = valid_files[valid_files["file_path"].str.endswith(".pdf")]
-        for _, row in doc_files.iterrows():
+        user_id = profile.user_id
+        emails = {e.lower() for e in profile.all_emails}
+        name_variants = {nv.lower() for nv in profile.name_variants}
+
+        multimodal_files = valid_files[
+            valid_files["file_path"].str.endswith(".pdf")
+            | valid_files["file_path"].str.endswith(".png")
+        ]
+
+        for _, row in multimodal_files.iterrows():
             fid = str(row["file_id"])
-            fpath = Path("dataset") / row["file_path"]
-            if not fpath.exists():
+            captured_at = str(row["captured_at"])
+            entry = self.multimodal_cache.get_evidence(fid)
+            if not entry:
                 continue
 
-            try:
-                reader = pypdf.PdfReader(str(fpath))
-                text = " ".join([page.extract_text() or "" for page in reader.pages]).lower()
-                if any(e in text for e in emails) or any(nv in text for nv in name_variants):
-                    m = re.search(r"(support_\d+)", text)
+            raw_text = entry.get("raw_text", "").lower()
+            records = entry.get("records", [])
+            origin_system = entry.get("system", str(row["origin"]))
+
+            # 1. Match against structured records extracted from the image/doc
+            for r in records:
+                r_user = str(r.get("user_id") or "")
+                r_email = str(r.get("email") or "").lower()
+                r_name = str(r.get("name") or "").lower()
+                r_res = str(r.get("resource_id") or "")
+                r_details = str(r.get("details") or "").lower()
+
+                is_user_match = (
+                    r_user == user_id
+                    or r_email in emails
+                    or any(nv in r_name for nv in name_variants)
+                    or any(e in r_details for e in emails)
+                )
+
+                if is_user_match:
+                    if not requested_at or captured_at >= requested_at:
+                        if "backup_" in r_res or "backup" in origin_system.lower():
+                            findings.append(
+                                AuditFinding(
+                                    system_id="backup_service",
+                                    resource_id=r_res if r_res else "backup_unknown",
+                                    operation="REPORT_RESTORE_RISK",
+                                    state="ACTIVE",
+                                    evidence_id=fid,
+                                    data_category="BACKUP_ARCHIVE",
+                                    details=r_details,
+                                )
+                            )
+                        elif "data_flow_" in r_res or "connector" in origin_system.lower():
+                            findings.append(
+                                AuditFinding(
+                                    system_id="integration_service",
+                                    resource_id=r_res if r_res else "data_flow_unknown",
+                                    operation="REPORT_ACTIVE_DATA_FLOW",
+                                    state="ACTIVE",
+                                    evidence_id=fid,
+                                    data_category="CONNECTOR_DATA_FLOW",
+                                    details=r_details,
+                                )
+                            )
+                        elif "search_" in r_res or "search" in origin_system.lower():
+                            findings.append(
+                                AuditFinding(
+                                    system_id="search_service",
+                                    resource_id=r_res if r_res else "search_unknown",
+                                    operation="REPORT_REMAINING_RECORD",
+                                    state="PRESENT",
+                                    evidence_id=fid,
+                                    data_category="SEARCH_INDEX",
+                                    details=r_details,
+                                )
+                            )
+                        elif "support_" in r_res or "support" in origin_system.lower():
+                            findings.append(
+                                AuditFinding(
+                                    system_id="support_platform",
+                                    resource_id=r_res if r_res else "support_001",
+                                    operation="REPORT_REMAINING_RECORD",
+                                    state="PRESENT",
+                                    evidence_id=fid,
+                                    data_category="CUSTOMER_SUPPORT",
+                                    details=r_details,
+                                )
+                            )
+                        elif "account_" in r_res or "account" in origin_system.lower():
+                            findings.append(
+                                AuditFinding(
+                                    system_id="account_service",
+                                    resource_id=r_res if r_res else f"account_{user_id.replace('user_', '')}",
+                                    operation="REPORT_REMAINING_RECORD",
+                                    state="PRESENT",
+                                    evidence_id=fid,
+                                    data_category="USER_PROFILE",
+                                    details=r_details,
+                                )
+                            )
+
+            # 2. Check raw_text (PDFs or unparsed image text)
+            if not records and (
+                any(e in raw_text for e in emails)
+                or any(nv in raw_text for nv in name_variants)
+                or (user_id and user_id in raw_text)
+            ):
+                if not requested_at or captured_at >= requested_at:
+                    m = re.search(r"(support_\d+)", raw_text)
                     res_id = m.group(1) if m else "support_001"
                     findings.append(
                         AuditFinding(
@@ -399,11 +493,9 @@ class AuditScanner:
                             state="PRESENT",
                             evidence_id=fid,
                             data_category="CUSTOMER_SUPPORT",
-                            details="Found customer personal data in support attachment PDF",
+                            details="Found customer personal data in multimodal evidence",
                         )
                     )
-            except Exception:
-                pass
 
         return findings, verifications
 
@@ -691,10 +783,10 @@ class AuditScanner:
         findings.extend(sql_findings)
         verifications.extend(sql_verifications)
 
-        # 4. Scan PDF documents
-        doc_findings, doc_verifications = self._scan_documents(valid_files, all_emails, name_variants)
-        findings.extend(doc_findings)
-        verifications.extend(doc_verifications)
+        # 4. Scan multimodal evidence (PDFs and UI screenshots)
+        mm_findings, mm_verifications = self._scan_multimodal_evidence(valid_files, profile, requested_at)
+        findings.extend(mm_findings)
+        verifications.extend(mm_verifications)
 
         # 5. Deep Scan JSON records
         json_findings, json_verifications = self._scan_json_records(valid_files, profile, requested_at)
