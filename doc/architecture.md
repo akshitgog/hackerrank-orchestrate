@@ -4,13 +4,14 @@
 
 The **AI Deletion Audit Agent** is an enterprise-grade multi-agent audit system designed for Northstar Shop to investigate, verify, and remediate customer data deletion requests across distributed databases, search indexes, backups, and data pipelines.
 
-The architecture strictly follows a **Hierarchical Orchestrator-Worker pattern** with **TypeSafe AI Jev** for structured decision-making, **dedicated sub-agent guardrails**, **self-correcting retry loops**, and **lazy on-demand caching**.
+The architecture strictly follows a **Hierarchical Orchestrator-Worker pattern** featuring a **Tandem Model Pipeline**: a high-speed **Vision-Language Model (VLM)** (Fireworks AI Llama-3.2-Vision, Qwen2.5-VL, or GPT-4o via LiteLLM) for multilingual context understanding and screenshot inspection, working alongside **TypeSafe AI Jev** for structured probabilistic compliance decisions, backed by **sub-agent guardrails**, **3-retry exponential backoff loops**, and **lazy on-demand caching**.
 
 ```mermaid
 flowchart TD
     subgraph INTAKE["1. Case Ingestion & Triage"]
         REQ["deletion_requests.csv"] --> ORCH["Orchestrator Agent<br/>(code/main.py)"]
-        ORCH --> JEV{"TypeSafe AI Jev<br/>Intent Decision"}
+        ORCH --> VLM["VLM Engine<br/>(Fireworks AI Llama-3.2-Vision / GPT-4o)"]
+        VLM --> JEV{"TypeSafe AI Jev<br/>Probabilistic Decision"}
         JEV -- "Non-Deletion" --> NA["NOT_APPLICABLE<br/>steps_json = []"]
     end
 
@@ -50,7 +51,7 @@ flowchart TD
 * **Role:** Central mission controller.
 * **Responsibilities:**
   1. Sequentially processes cases from `dataset/deletion_requests.csv` without cross-case state contamination.
-  2. Queries **TypeSafe AI Jev** with `request_text` to obtain a structured intent decision and calibrated probability score.
+  2. Evaluates multilingual `request_text` via the VLM Engine (Fireworks AI Llama-3.2-Vision / Qwen2.5-VL / GPT-4o) and passes semantic signals to **TypeSafe AI Jev** to obtain a structured intent decision and calibrated probability score.
   3. Short-circuits non-deletion requests immediately to `NOT_APPLICABLE` with `steps_json = []`.
   4. Manages sub-agent lifecycle: invokes Logging Agent, Audit Agent, and Step-JSON Agent in strict order.
   5. Implements **Retry Loops (2–3 attempts)** with error reflection when a sub-agent output fails its guardrail.
