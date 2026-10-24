@@ -12,7 +12,7 @@ from typing import Any, Optional
 import requests
 
 from code.src.orchestrator.models import IntentClassificationResult
-from code.src.common.llm_client import RobustLLMClient
+from code.src.common.llm_client import RobustLLMClient, USAGE_TRACKER
 
 
 NON_DELETION_PATTERNS = [
@@ -130,6 +130,8 @@ class IntentClassifier:
                 )
                 if resp.status_code == 200:
                     data = resp.json()
+                    tok_est = max(1, len(request_text.split()))
+                    USAGE_TRACKER.record_usage("local/mDeBERTa-v3-base-xnli", prompt_tokens=tok_est, completion_tokens=2)
                     conf = float(data.get("confidence", 0.0))
                     is_auth = conf >= self.threshold
                     cat = "ACCOUNT_DELETION" if is_auth else "NON_DELETION"
