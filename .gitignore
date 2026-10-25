@@ -19,6 +19,7 @@ Thumbs.db
 
 # Submission archives
 *.zip
+agent-trace/
 
 # Submission outputs and runtime logs
 output.csv
