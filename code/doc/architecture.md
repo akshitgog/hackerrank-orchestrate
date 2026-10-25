@@ -22,21 +22,45 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    R["deletion_requests.csv"] --> M["code/main.py (Orchestrator)"]
-    M --> I["IntentClassifier"]
-    I -->|not authorized| NA["NOT_APPLICABLE<br/>(steps_json: [])"]
-    I -->|authorized deletion| T["IdentityTracker"]
-    T --> P["UserIdentityProfile"]
-    P --> S["AuditScanner"]
-    S --> E["Evidence Sources<br/>(SQL, Logs, JSON, Multimodal)"]
-    S --> A["AttributionIndex"]
-    S --> Q["PolicyEngine"]
-    E --> D["AuditResult"]
-    A --> D
-    Q --> D
-    D --> B["StepJsonBuilder"]
-    B --> G["Guardrails Suite"]
-    G --> O["output.csv"]
+    subgraph Ingestion["Stage 1: Ingestion & Triage"]
+        REQ["deletion_requests.csv<br/>(518 Requests)"] --> MAIN["code/main.py<br/>(Orchestrator)"]
+        MAIN --> CLF["IntentClassifier<br/>(6 Languages)"]
+        CLF -->|Not Authorized<br/>SAR / Export / Opt-Out| NA["NOT_APPLICABLE<br/>steps_json = []"]
+    end
+
+    subgraph Identity["Stage 2: Identity Backtracking"]
+        CLF -->|Authorized Deletion| TRK["IdentityTracker"]
+        TRK --> NORM["Canonical Normalizer<br/>(NFC + Accent Stripping)"]
+        NORM --> HIST["Audit Backtracker<br/>(user_identities.csv + user_audit_log.csv)"]
+        HIST -->|Cutoff <= audit_at| PROF["UserIdentityProfile<br/>(IDs, Emails, Hashes, Phones, Aliases)"]
+        PROF --> ID_G["IdentityGuardrail"]
+    end
+
+    subgraph Audit["Stage 3: Evidence Audit & Attribution"]
+        ID_G --> SCN["AuditScanner"]
+        SCN --> SQL_ENG["In-Memory SQLite Engine<br/>(UNICODE_LOWER, STRIP_ACCENTS)"]
+        SCN --> JSON_ENG["Deep JSON Parser<br/>(28 Snapshot / Resource Bundles)"]
+        SCN --> ACT_ENG["System Activity Scanner<br/>(Sync Flows & Backup Restores)"]
+        SCN --> VLM_ENG["Multimodal Cache<br/>(11 PNG Screens + 4 Vector PDFs)"]
+        SQL_ENG --> ATTR["AttributionIndex<br/>(Resource-Local Evidence Grounding)"]
+        JSON_ENG --> ATTR
+        ACT_ENG --> ATTR
+        VLM_ENG --> ATTR
+        ATTR --> POL["PolicyEngine<br/>(deletion_rules.csv Mapping)"]
+        POL --> AUD_RES["AuditResult<br/>(Findings, Proofs, Resource States)"]
+        AUD_RES --> AUD_G["AuditGuardrail"]
+    end
+
+    subgraph Planning["Stage 4: Step-JSON Planning & Serialization"]
+        AUD_G --> BLD["StepJsonBuilder"]
+        BLD --> GRAPH["Dependency Graph Resolver<br/>(Flows/Restores -> Records -> Tombstones)"]
+        GRAPH --> SER["Canonical RFC 8259 Serializer<br/>(FINDING -> REMEDIATION -> VERIFICATION)"]
+        SER --> JEV_G["JevSchemaGuardrail"]
+    end
+
+    subgraph Output["Stage 5: Output Packaging"]
+        JEV_G --> OUT["output.csv / sample_predictions.csv<br/>(case_id, deletion_status, steps_json)"]
+    end
 ```
 
 ## 3. Components and responsibilities

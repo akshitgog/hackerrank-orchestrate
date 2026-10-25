@@ -72,54 +72,7 @@ flowchart TD
 
 ---
 
-## 2. Phased Implementation Plan & Milestone Status
-
-The system was engineered across seven structured phases with rigorous acceptance testing at each stage:
-
-```
-[Phase 0: Scaffolding] -> [Phase 1: Identity] -> [Phase 2: Audit Engine] -> [Phase 3: Serialization]
-                                                                                   │
-[Phase 6: Final Packaging] <- [Phase 5: Evaluation Grid] <- [Phase 4: Orchestrator] ┘
-```
-
-### Phase 0: Scaffolding, Configuration & Secrets
-- **Goal:** Dynamic configuration management, typed dataclasses, and safe secrets isolation.
-- **Deliverables:** `config/config.yaml`, `config/loader.py`, `code/.env.example`, `requirements.txt`.
-- **Status:** **Completed.** Zero hardcoded paths; secrets read strictly from environment variables.
-
-### Phase 1: Logging Agent & Identity Tracking
-- **Goal:** Historical identity backtracking with Unicode normalization and cutoff enforcement.
-- **Deliverables:** `src/logging_agent/normalizer.py`, `src/logging_agent/tracker.py`, `guardrails/identity_guardrail.py`.
-- **Status:** **Completed.** 100% resolution across sample and whole datasets; zero post-cutoff temporal leakage.
-
-### Phase 2: Audit Agent & Deep Scanner
-- **Goal:** Deep evidence scanning across SQL databases, JSON snapshot bundles, logs, and multimodal assets.
-- **Deliverables:** `src/audit_agent/db.py`, `src/audit_agent/scanner.py`, `src/audit_agent/multimodal_cache.py`, `guardrails/audit_guardrail.py`.
-- **Status:** **Completed.** In-memory SQLite with Unicode collation; deep JSON parsing for all 28 bundles; temporal filtering (`captured_at >= requested_at`).
-
-### Phase 3: Step-JSON Agent & Graph Planner
-- **Goal:** RFC 8259 JSON serialization with dependency-first remediation ordering.
-- **Deliverables:** `src/step_json_agent/builder.py`, `guardrails/jev_schema_guardrail.py`.
-- **Status:** **Completed.** Strict `FINDING` $\rightarrow$ `REMEDIATION` $\rightarrow$ `VERIFICATION` ordering; disable sync flows/restores prior to dependent record deletion; consecutive 1..N numbering.
-
-### Phase 4: Orchestration & Triage Classifier
-- **Goal:** Multilingual request triage and end-to-end execution pipeline.
-- **Deliverables:** `src/orchestrator/classifier.py`, `main.py`, `guardrails/intent_guardrail.py`.
-- **Status:** **Completed.** Accurate classification across 6 languages; non-deletion requests routed to `NOT_APPLICABLE` with `steps_json = []`.
-
-### Phase 5: Evaluation Framework & Threshold Calibration
-- **Goal:** Systematic threshold grid search and automated benchmarking.
-- **Deliverables:** `evaluation/main.py`, `evaluation/run_threshold_grid.py`, `evaluation/evaluation_report.md`.
-- **Status:** **Completed.** Grid search across 8 candidate thresholds (`0.50` to `0.95`); achieved **100.0% Status Accuracy**, **100.0% Sequence Accuracy**, and **100.0% Evidence Grounding**.
-
-### Phase 6: Full Production Run & Packaging
-- **Goal:** Generate root `output.csv`, token telemetry report, and clean code package.
-- **Deliverables:** Root `output.csv` (518 cases), `code/evaluation/usage_report.md`, `code/README.md`.
-- **Status:** **Completed.** Verified 518 sorted rows, zero null values, all guardrails passed.
-
----
-
-## 3. Quick Setup & Environment
+## 2. Quick Setup & Environment
 
 ### 1. Python Environment
 
@@ -153,7 +106,7 @@ Add your API key (`FIREWORKS_API_KEY`, `OPENAI_API_KEY`, etc.) inside `code/.env
 
 ---
 
-## 4. Production Execution Commands
+## 3. Production Execution Commands
 
 All commands are executed from the repository root:
 
@@ -191,11 +144,11 @@ python code/evaluation/run_threshold_grid.py --clear-cache --run-whole
 
 ---
 
-## 5. Evaluation & Calibration Results
+## 4. Evaluation & Calibration Results
 
 The evaluation methodology strictly separates **prediction generation** from **ground-truth scoring** (`--pred`), ensuring 100% reproducible benchmarks.
 
-### 5.1 Threshold Grid Search Progression History
+### 4.1 Threshold Grid Search Progression History
 
 Below is the complete measured history of model and heuristic intent threshold exploration across all candidate thresholds:
 
@@ -213,7 +166,7 @@ Below is the complete measured history of model and heuristic intent threshold e
 > [!NOTE]
 > Optimal performance is achieved at threshold `0.50`–`0.65`, where confidence calibration perfectly separates true deletion requests from non-deletion actions while capturing 100% of residual findings. At higher thresholds (e.g., `0.95`), valid multilingual requests are under-triggered, dropping status accuracy to 46.9%.
 
-### 5.2 Key Benchmark Dimensions
+### 4.2 Key Benchmark Dimensions
 
 - **Case-Level Status Accuracy:** `100.0%` (32/32 sample cases correctly routed)
   - **COMPLETE Cases:** 10/10 correctly verified as having zero residual records, inactive syncs, blocked restores, and verified absent/anonymized states.
@@ -224,7 +177,7 @@ Below is the complete measured history of model and heuristic intent threshold e
 - **Evidence Citation Grounding:** `100.0%` (All findings and complete verifications cite participant-visible manifest IDs).
 - **Guardrail Pass Rate:** `100.0%`
 
-### 5.3 Custom Evaluation Test Cases (§6.8 Specification Compliance)
+### 4.3 Custom Evaluation Test Cases (§6.8 Specification Compliance)
 
 As required by §6.8 of the challenge specification, three custom edge-case scenarios were designed, benchmarked, and verified:
 
@@ -246,7 +199,7 @@ As required by §6.8 of the challenge specification, three custom edge-case scen
 - **Expected Output:** `COMPLETE` with evidence-backed verifications: `account_service` (ABSENT), `security_service` (PRESENT), and `identity_service` (REDACTED).
 - **Result:** **PASSED**. Accurately distinguished between unredacted tombstones (which trigger findings) and redacted tombstones (which verify compliance).
 
-### 5.4 Failures Found and Improvements Made
+### 4.4 Failures Found and Improvements Made
 
 Below is the retrospective of critical edge cases identified during empirical testing and the architectural improvements made:
 
@@ -264,7 +217,7 @@ Detailed evaluation telemetry and history are preserved in:
 
 ---
 
-## 6. Deterministic Guardrails Suite
+## 5. Deterministic Guardrails Suite
 
 Four specialized guardrail layers intercept and validate every request at stage boundaries:
 
@@ -300,7 +253,7 @@ flowchart LR
 
 ---
 
-## 7. Testing & Verification Strategy
+## 6. Testing & Verification Strategy
 
 The testing suite protects identity resolution, evidence attribution, schema compliance, and pipeline execution across multiple testing layers:
 
@@ -344,7 +297,7 @@ python -m py_compile \
 
 ---
 
-## 8. Observability, Telemetry & Tracing
+## 7. Observability, Telemetry & Tracing
 
 Enterprise observability is embedded into every execution path, separating human-readable conversation tracking from machine-level agent execution logs and token usage telemetry:
 
@@ -379,7 +332,7 @@ Enterprise observability is embedded into every execution path, separating human
 
 ---
 
-## 9. Software Engineering & Data Integrity Rules
+## 8. Software Engineering & Data Integrity Rules
 
 All code adheres to strict enterprise software engineering standards:
 
@@ -403,7 +356,7 @@ All code adheres to strict enterprise software engineering standards:
 
 ---
 
-## 10. Directory Layout
+## 9. Directory Layout
 
 ```text
 code/
@@ -462,7 +415,7 @@ code/
 
 ---
 
-## 11. Related Documentation in `code/doc/`
+## 10. Related Documentation in `code/doc/`
 
 For deep-dive documentation on specific subsystems, consult the companion guides inside `code/doc/`:
 - [`doc/architecture.md`](doc/architecture.md) — Detailed subsystem architecture and data flow diagrams.
