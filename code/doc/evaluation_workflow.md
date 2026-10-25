@@ -13,12 +13,12 @@ unavailable, or when a lazy evidence extractor has different cache state.
 
 The maintained workflow therefore separates **generation** from **scoring**:
 
-```text
-threshold
-   -> code/main.py
-   -> saved prediction CSV
-   -> code/evaluation/main.py --pred
-   -> metrics and report
+```mermaid
+flowchart LR
+    TH["Candidate Threshold"] --> RUN["code/main.py"]
+    RUN --> CSV["Saved Prediction CSV<br/>(sample_predictions.csv)"]
+    CSV --> EVAL["code/evaluation/main.py --pred"]
+    EVAL --> REP["Metrics & Report<br/>(evaluation_report.md)"]
 ```
 
 The evaluator's `--pred` mode never reruns the scanner. It parses the saved CSV and compares

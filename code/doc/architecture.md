@@ -8,35 +8,35 @@ The agent **does not delete data itself**. Remediation steps are proposed operat
 
 The production entry point is `code/main.py`:
 
-```text
-request row
-  -> intent classification
-  -> identity reconstruction
-  -> evidence/resource scan
-  -> policy and state decision
-  -> canonical steps_json serialization
-  -> CSV row
+```mermaid
+flowchart LR
+    R["Request Row"] --> I["Intent Classification"]
+    I --> ID["Identity Reconstruction"]
+    ID --> S["Evidence Scan"]
+    S --> P["Policy & State Decision"]
+    P --> J["Canonical Step-JSON"]
+    J --> C["CSV Output Row"]
 ```
 
 ## 2. Runtime flow
 
 ```mermaid
 flowchart TD
-    R[deletion_requests.csv] --> M[code/main.py]
-    M --> I[IntentClassifier]
-    I -->|not authorized| NA[NOT_APPLICABLE / []]
-    I -->|authorized deletion| T[IdentityTracker]
-    T --> P[UserIdentityProfile]
-    P --> S[AuditScanner]
-    S --> E[Evidence manifest, SQL, logs, JSON, text, PDF/image cache]
-    S --> A[AttributionIndex]
-    S --> Q[PolicyEngine]
-    E --> D[AuditResult]
+    R["deletion_requests.csv"] --> M["code/main.py (Orchestrator)"]
+    M --> I["IntentClassifier"]
+    I -->|not authorized| NA["NOT_APPLICABLE<br/>(steps_json: [])"]
+    I -->|authorized deletion| T["IdentityTracker"]
+    T --> P["UserIdentityProfile"]
+    P --> S["AuditScanner"]
+    S --> E["Evidence Sources<br/>(SQL, Logs, JSON, Multimodal)"]
+    S --> A["AttributionIndex"]
+    S --> Q["PolicyEngine"]
+    E --> D["AuditResult"]
     A --> D
     Q --> D
-    D --> B[StepJsonBuilder]
-    B --> G[Guardrails]
-    G --> O[output.csv]
+    D --> B["StepJsonBuilder"]
+    B --> G["Guardrails Suite"]
+    G --> O["output.csv"]
 ```
 
 ## 3. Components and responsibilities

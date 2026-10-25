@@ -11,6 +11,13 @@ Tests protect four outcomes:
 
 Tests are divided into focused unit tests, guardrail tests, sample evaluation, and whole-run validation. Run the smallest relevant layer first.
 
+```mermaid
+flowchart TD
+    U["Layer 1: Unit & Guardrail Tests<br/>(code/tests/ — 28 Fast Tests)"] --> S["Layer 2: Sample Ground Truth Evaluation<br/>(32 Requests vs dataset/sample_output.csv)"]
+    S --> G["Layer 3: Threshold Grid Sweep<br/>(run_threshold_grid.py — 8 Candidates)"]
+    G --> W["Layer 4: Whole Production Validation<br/>(518 Requests -> root output.csv)"]
+```
+
 ## 2. Fast verification commands
 
 From the repository root:

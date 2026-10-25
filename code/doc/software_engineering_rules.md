@@ -57,7 +57,13 @@ These rules apply to production code, evidence parsing, evaluation changes, and 
 
 1. Output columns are exactly `case_id,deletion_status,steps_json`.
 2. `NOT_APPLICABLE` always uses `[]`.
-3. Step phases are ordered `FINDING`, then `REMEDIATION`, then `VERIFICATION`.
+3. Step phases are ordered `FINDING`, then `REMEDIATION`, then `VERIFICATION`:
+
+```mermaid
+flowchart LR
+    F["FINDING<br/>(Evidence-Backed Compliance Gaps)"] --> R["REMEDIATION<br/>(Dependency-Ordered Safe Actions)"]
+    R --> V["VERIFICATION<br/>(Post-Remediation Verification Targets)"]
+```
 4. Within a phase, use the canonical operation order in `StepJsonBuilder`, followed by ascending `system_id` and `resource_id`.
 5. Renumber steps consecutively from 1 after all sorting.
 6. Serialize valid RFC 8259 JSON; do not rely on Python object ordering for correctness.
