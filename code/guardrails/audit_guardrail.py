@@ -73,7 +73,7 @@ class AuditGuardrail:
         for v in result.verifications:
             if v.operation not in self.VALID_VERIFICATION_OPERATIONS:
                 errors.append(f"Invalid verification operation '{v.operation}' in case {result.case_id}.")
-            if not v.evidence_id:
+            if result.deletion_status == "COMPLETE" and not v.evidence_id:
                 errors.append(f"Verification proof for {v.resource_id} in COMPLETE case has empty evidence_id.")
 
         return len(errors) == 0, errors

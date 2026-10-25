@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-10-25T02:10:09.040393+00:00",
+  "threshold": 0.9,
+  "total_cases": 32,
+  "status_accuracy": 1.0,
+  "step_f1": 0.9741,
+  "step_precision": 0.9741,
+  "step_recall": 0.9741,
+  "field_accuracy": 1.0,
+  "sequence_accuracy": 1.0,
+  "evidence_grounding_accuracy": 1.0,
+  "guardrail_pass_rate": 1.0,
+  "status_counts": {
+    "tp": {
+      "COMPLETE": 10,
+      "INCOMPLETE": 22,
+      "NOT_APPLICABLE": 0
+    },
+    "fp": {
+      "COMPLETE": 0,
+      "INCOMPLETE": 0,
+      "NOT_APPLICABLE": 0
+    },
+    "fn": {
+      "COMPLETE": 0,
+      "INCOMPLETE": 0,
+      "NOT_APPLICABLE": 0
+    }
+  },
+  "prediction_path": "C:\\Users\\Galactus\\OneDrive\\Desktop\\nriutnrt\\evaluation\\threshold_runs\\threshold_0_90\\sample_predictions.csv",
+  "exact_case_matches": 24
+}

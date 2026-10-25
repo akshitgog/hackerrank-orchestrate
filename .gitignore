@@ -19,3 +19,10 @@ Thumbs.db
 
 # Submission archives
 *.zip
+
+# Submission outputs and runtime logs
+output.csv
+sample_predictions.csv
+log.txt
+*.log
+*.pid

@@ -11,11 +11,10 @@ models:
     retries: 3
     initial_backoff: 1.0
 
-  # Decision Model (Replaced TypeSafe Jev with your isolated local service model)
-  # Runs on your local RTX 3050 via http://127.0.0.1:8000
+  # Decision Model (Disabled local placeholder so GLM-5.3-Flash handles requests directly)
   decision_model:
-    enabled: true
-    provider: "local" # Indicates your self-hosted FastAPI endpoint
+    enabled: false
+    provider: "local"
     endpoint: "http://127.0.0.1:8000/v1/decisions"
     model: "local-decision-v1"
     timeout_seconds: 10

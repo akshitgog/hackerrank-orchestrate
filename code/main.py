@@ -52,6 +52,23 @@ def parse_args() -> argparse.Namespace:
         default="code/config/config.yaml",
         help="Path to YAML configuration file",
     )
+    parser.add_argument(
+        "--no-llm",
+        action="store_true",
+        help="Disable remote/local model calls and use deterministic triage fallbacks",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Prediction CSV path (defaults to sample_predictions.csv for sample mode and output.csv for whole mode)",
+    )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=None,
+        help="Override the configured intent threshold for this run",
+    )
     return parser.parse_args()
 
 
@@ -69,7 +86,11 @@ def main() -> None:
         requests_file = "dataset/deletion_requests.csv"
         print("=== Running in WHOLE mode (518 cases) ===")
 
-    threshold = float(config.get("thresholds", {}).get("intent_decision", 0.80))
+    threshold = args.threshold
+    if threshold is None:
+        threshold = float(config.get("thresholds", {}).get("intent_decision", 0.80))
+    if not 0.0 <= threshold <= 1.0:
+        raise ValueError(f"Intent threshold must be between 0 and 1, got {threshold}")
     print(f"Loaded config from {args.config}")
     print(f"Intent Threshold: {threshold}")
 
@@ -77,7 +98,11 @@ def main() -> None:
     llm_cfg = config.get("models", {}).get("llm_engine", {})
     decision_cfg = config.get("models", {}).get("decision_model", {})
 
-    llm_model = llm_cfg.get("model") if llm_cfg.get("enabled", False) else None
+    llm_model = (
+        llm_cfg.get("model")
+        if llm_cfg.get("enabled", False) and not args.no_llm
+        else None
+    )
     decision_endpoint = None
     if decision_cfg.get("enabled", False) and decision_cfg.get("provider") == "local":
         decision_endpoint = decision_cfg.get("endpoint", "http://127.0.0.1:8000/v1/decisions")
@@ -117,6 +142,7 @@ def main() -> None:
         case_id = str(row["case_id"])
         email = str(row["email"])
         requested_at = str(row.get("requested_at", ""))
+        reported_at = str(row.get("reported_at", ""))
         audit_at = str(row["audit_at"])
         request_text = str(row.get("request_text", ""))
 
@@ -141,18 +167,36 @@ def main() -> None:
         profile = tracker.get_identity_profile(email, audit_at)
         if not profile:
             print(f"[!] Could not resolve profile for {case_id} ({email})")
+            incomplete_count += 1
+            results.append({
+                "case_id": case_id,
+                "deletion_status": "INCOMPLETE",
+                "steps_json": "[]",
+            })
             continue
 
         id_valid, id_err = id_guardrail.validate(profile)
         if not id_valid:
             print(f"[!] Identity guardrail error for {case_id}: {id_err}")
+            incomplete_count += 1
+            results.append({
+                "case_id": case_id,
+                "deletion_status": "INCOMPLETE",
+                "steps_json": "[]",
+            })
             continue
 
         # Phase 2: Audit Scanner
-        audit_res = scanner.audit_case(case_id, profile, audit_at, requested_at=requested_at)
+        audit_res = scanner.audit_case(case_id, profile, audit_at, requested_at=requested_at, reported_at=reported_at)
         res_valid, audit_errs = audit_guardrail.validate(audit_res)
         if not res_valid:
             print(f"[!] Audit guardrail error for {case_id}: {audit_errs}")
+            incomplete_count += 1
+            results.append({
+                "case_id": case_id,
+                "deletion_status": "INCOMPLETE",
+                "steps_json": "[]",
+            })
             continue
 
         if audit_res.deletion_status == "COMPLETE":
@@ -182,16 +226,22 @@ def main() -> None:
     print(f"  - NOT_APPLICABLE: {not_applicable_count}")
     print(f"  - All Guardrails Passed: {guardrails_passed_count}/{len(requests_df)} ({guardrails_passed_count / len(requests_df) * 100:.1f}%)")
 
-    # If running whole dataset, save output.csv and usage report
+    # Persist predictions for both modes so evaluation can score the exact run
+    # rather than invoking the pipeline a second time.
+    output_path = args.output or ("sample_predictions.csv" if is_sample else "output.csv")
+    out_df = pd.DataFrame(results)
+    out_df.to_csv(output_path, index=False)
+    print(f"Successfully generated predictions at {output_path} with {len(out_df)} rows.")
+
+    # If running whole dataset, also generate the usage report.
     if not is_sample:
-        out_df = pd.DataFrame(results)
         # Sort by case_id numerically if case_XX format
         out_df["sort_key"] = out_df["case_id"].apply(
             lambda x: int(x.split("_")[1]) if "_" in x and x.split("_")[1].isdigit() else 9999
         )
         out_df = out_df.sort_values("sort_key").drop(columns=["sort_key"])
-        out_df.to_csv("output.csv", index=False)
-        print(f"Successfully generated root output.csv with {len(out_df)} sorted rows.")
+        out_df.to_csv(output_path, index=False)
+        print(f"Successfully generated sorted whole-dataset predictions at {output_path}.")
 
         # Generate usage report for evaluation contract (§6.8)
         usage_summary = USAGE_TRACKER.summary()

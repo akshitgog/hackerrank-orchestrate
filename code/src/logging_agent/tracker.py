@@ -38,6 +38,13 @@ class IdentityTracker:
         self.identities_df = pd.read_csv(self.identities_path)
         self.audit_log_df = pd.read_csv(self.audit_log_path)
 
+        # Keep all temporal decisions timezone-aware.  Comparing timestamp
+        # strings happens to work for the current ISO exports, but it silently
+        # breaks as soon as offsets or mixed timestamp formats appear.
+        self.audit_log_df["event_time_parsed"] = pd.to_datetime(
+            self.audit_log_df["event_time"], errors="coerce", utc=True
+        )
+
         # Normalize strings for robust lookups
         self.identities_df["email_normalized"] = (
             self.identities_df["email"].astype(str).str.strip().str.lower()
@@ -60,22 +67,36 @@ class IdentityTracker:
             zip(email_audit["old_value_normalized"], email_audit["user_id"])
         )
 
-    def resolve_user_id(self, email: str) -> tuple[Optional[str], str]:
+    def resolve_user_id(
+        self, email: str, audit_at: Optional[str] = None
+    ) -> tuple[Optional[str], str]:
         """Resolve a request email to a user_id, checking current and historical records.
         
         Returns:
             (user_id, match_source) where match_source is 'current_email', 
             'audit_log_historical', or 'unmatched'.
         """
-        normalized_email = email.strip().lower()
+        normalized_email = normalize_text_nfc(email)
 
         # 1. Try direct match in current identities
         if normalized_email in self._current_email_to_user:
             return self._current_email_to_user[normalized_email], "current_email"
 
-        # 2. Try match against historical emails in audit log
-        if normalized_email in self._historical_email_to_user:
-            return self._historical_email_to_user[normalized_email], "audit_log_historical"
+        # 2. Try match against historical emails in audit log.  When a cutoff
+        # is available, future identity changes must not leak into the case.
+        audit_rows = self.audit_log_df[self.audit_log_df["field_name"] == "email"]
+        if audit_at:
+            cutoff = pd.to_datetime(audit_at, errors="coerce", utc=True)
+            if not pd.isna(cutoff):
+                audit_rows = audit_rows[audit_rows["event_time_parsed"] <= cutoff]
+        historical = audit_rows[
+            (audit_rows["old_value_normalized"] == normalized_email)
+            | (audit_rows["new_value_normalized"] == normalized_email)
+        ]
+        if not historical.empty:
+            # The latest admissible change is the strongest ownership signal.
+            historical = historical.sort_values("event_time_parsed")
+            return str(historical.iloc[-1]["user_id"]), "audit_log_historical"
 
         return None, "unmatched"
 
@@ -93,7 +114,7 @@ class IdentityTracker:
         Returns:
             UserIdentityProfile or None if user cannot be resolved.
         """
-        user_id, match_source = self.resolve_user_id(email)
+        user_id, match_source = self.resolve_user_id(email, audit_at=audit_at)
         if not user_id:
             return None
 
@@ -119,10 +140,10 @@ class IdentityTracker:
             all_emails.add(req_email_clean)
 
         # Filter audit log strictly by user_id and event_time <= audit_at
-        user_audit = self.audit_log_df[
-            (self.audit_log_df["user_id"] == user_id)
-            & (self.audit_log_df["event_time"] <= audit_at)
-        ]
+        cutoff = pd.to_datetime(audit_at, errors="coerce", utc=True)
+        user_audit = self.audit_log_df[self.audit_log_df["user_id"] == user_id]
+        if not pd.isna(cutoff):
+            user_audit = user_audit[user_audit["event_time_parsed"] <= cutoff]
 
         # Extract historical values from audit trail
         for _, change in user_audit.iterrows():

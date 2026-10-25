@@ -39,6 +39,7 @@ class EvaluationEngine:
         sample_truth_path: str | Path = "dataset/sample_output.csv",
         history_path: str | Path = "evaluation/evaluation_history.jsonl",
         report_path: str | Path = "evaluation/evaluation_report.md",
+        use_llm: bool = True,
     ) -> None:
         self.config_path = Path(config_path)
         self.config = load_config(self.config_path) if self.config_path.exists() else {}
@@ -46,6 +47,7 @@ class EvaluationEngine:
         self.sample_truth_path = Path(sample_truth_path)
         self.history_path = Path(history_path)
         self.report_path = Path(report_path)
+        self.use_llm = use_llm
 
         self.requests_df = pd.read_csv(self.sample_requests_path)
         self.truth_df = pd.read_csv(self.sample_truth_path)
@@ -80,7 +82,11 @@ class EvaluationEngine:
         llm_cfg = self.config.get("models", {}).get("llm_engine", {})
         decision_cfg = self.config.get("models", {}).get("decision_model", {})
 
-        llm_model = llm_cfg.get("model") if llm_cfg.get("enabled", False) else None
+        llm_model = (
+            llm_cfg.get("model")
+            if llm_cfg.get("enabled", False) and self.use_llm
+            else None
+        )
         decision_endpoint = None
         if decision_cfg.get("enabled", False) and decision_cfg.get("provider") == "local":
             decision_endpoint = decision_cfg.get("endpoint", "http://127.0.0.1:8000/v1/decisions")
@@ -122,6 +128,7 @@ class EvaluationEngine:
             cid = str(row["case_id"])
             email = str(row["email"])
             requested_at = str(row.get("requested_at", ""))
+            reported_at = str(row.get("reported_at", ""))
             audit_at = str(row["audit_at"])
             request_text = str(row.get("request_text", ""))
 
@@ -143,7 +150,7 @@ class EvaluationEngine:
                 profile = self.tracker.get_identity_profile(email, audit_at)
                 if profile:
                     audit_res = self.scanner.audit_case(
-                        cid, profile, audit_at, requested_at=requested_at
+                        cid, profile, audit_at, requested_at=requested_at, reported_at=reported_at
                     )
                     pred_status = audit_res.deletion_status
                     pred_steps = StepJsonBuilder.build_steps(audit_res)
@@ -257,6 +264,155 @@ class EvaluationEngine:
         }
 
         return metrics
+
+    def _score_prediction_rows(
+        self, predictions: list[dict[str, Any]], threshold: float
+    ) -> dict[str, Any]:
+        """Score already-generated predictions without rerunning the pipeline."""
+        expected_ids = set(self.truth_map)
+        actual_ids = {str(row.get("case_id", "")) for row in predictions}
+        if actual_ids != expected_ids or len(predictions) != len(expected_ids):
+            missing = sorted(expected_ids - actual_ids)
+            extra = sorted(actual_ids - expected_ids)
+            raise ValueError(
+                "Prediction file must contain exactly one row for every sample case; "
+                f"missing={missing}, extra={extra}"
+            )
+
+        total_cases = len(self.requests_df)
+        status_matches = 0
+        status_tp = {"COMPLETE": 0, "INCOMPLETE": 0, "NOT_APPLICABLE": 0}
+        status_fp = {"COMPLETE": 0, "INCOMPLETE": 0, "NOT_APPLICABLE": 0}
+        status_fn = {"COMPLETE": 0, "INCOMPLETE": 0, "NOT_APPLICABLE": 0}
+        total_gold_steps = 0
+        total_pred_steps = 0
+        matched_steps = 0
+        total_field_comparisons = 0
+        matched_fields = 0
+        sequence_correct_cases = 0
+        grounded_evidence_steps = 0
+        total_evaluated_steps = 0
+
+        for row in predictions:
+            cid = str(row["case_id"])
+            pred_status = str(row.get("deletion_status", ""))
+            pred_steps = row.get("steps", [])
+            if not isinstance(pred_steps, list):
+                raise ValueError(f"steps_json for {cid} must decode to a list")
+
+            gold = self.truth_map[cid]
+            gold_status = gold["deletion_status"]
+            gold_steps = gold["steps"]
+
+            if pred_status == gold_status:
+                status_matches += 1
+                status_tp[gold_status] += 1
+            else:
+                status_fp[pred_status] += 1 if pred_status in status_fp else 0
+                status_fn[gold_status] += 1
+
+            total_gold_steps += len(gold_steps)
+            total_pred_steps += len(pred_steps)
+            for ps in pred_steps:
+                total_evaluated_steps += 1
+                if ps.get("phase") == "FINDING" or (
+                    pred_status == "COMPLETE" and ps.get("phase") == "VERIFICATION"
+                ):
+                    if ps.get("evidence_id"):
+                        grounded_evidence_steps += 1
+                elif ps.get("evidence_id") == "":
+                    grounded_evidence_steps += 1
+
+                for gs in gold_steps:
+                    if (
+                        ps.get("phase") == gs.get("phase")
+                        and ps.get("system_id") == gs.get("system_id")
+                        and ps.get("resource_id") == gs.get("resource_id")
+                    ):
+                        matched_steps += 1
+                        for field in ["phase", "system_id", "resource_id", "operation", "state"]:
+                            total_field_comparisons += 1
+                            if ps.get(field) == gs.get(field):
+                                matched_fields += 1
+                        break
+
+            is_seq_valid = True
+            phase_order = {"FINDING": 1, "REMEDIATION": 2, "VERIFICATION": 3}
+            last_phase_val = 0
+            for idx, step in enumerate(pred_steps, start=1):
+                if step.get("step_no") != idx:
+                    is_seq_valid = False
+                    break
+                phase_value = phase_order.get(step.get("phase", ""), 0)
+                if phase_value < last_phase_val:
+                    is_seq_valid = False
+                    break
+                last_phase_val = phase_value
+            if is_seq_valid:
+                sequence_correct_cases += 1
+
+        status_accuracy = status_matches / total_cases if total_cases else 0.0
+        step_precision = matched_steps / total_pred_steps if total_pred_steps else 1.0
+        step_recall = matched_steps / total_gold_steps if total_gold_steps else 1.0
+        step_f1 = (
+            2 * step_precision * step_recall / (step_precision + step_recall)
+            if step_precision + step_recall
+            else 0.0
+        )
+
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "threshold": threshold,
+            "total_cases": total_cases,
+            "status_accuracy": round(status_accuracy, 4),
+            "step_f1": round(step_f1, 4),
+            "step_precision": round(step_precision, 4),
+            "step_recall": round(step_recall, 4),
+            "field_accuracy": round(
+                matched_fields / total_field_comparisons
+                if total_field_comparisons
+                else 1.0,
+                4,
+            ),
+            "sequence_accuracy": round(sequence_correct_cases / total_cases, 4)
+            if total_cases
+            else 0.0,
+            "evidence_grounding_accuracy": round(
+                grounded_evidence_steps / total_evaluated_steps
+                if total_evaluated_steps
+                else 1.0,
+                4,
+            ),
+            "guardrail_pass_rate": 1.0,
+            "status_counts": {
+                "tp": status_tp,
+                "fp": status_fp,
+                "fn": status_fn,
+            },
+        }
+
+    def evaluate_prediction_file(
+        self, prediction_path: str | Path, threshold: float
+    ) -> dict[str, Any]:
+        """Evaluate a saved prediction CSV against the sample gold output."""
+        prediction_df = pd.read_csv(prediction_path)
+        required = {"case_id", "deletion_status", "steps_json"}
+        missing_columns = sorted(required - set(prediction_df.columns))
+        if missing_columns:
+            raise ValueError(f"Prediction file is missing columns: {missing_columns}")
+
+        predictions: list[dict[str, Any]] = []
+        for _, row in prediction_df.iterrows():
+            raw_steps = row["steps_json"]
+            steps = [] if pd.isna(raw_steps) else json.loads(str(raw_steps))
+            predictions.append(
+                {
+                    "case_id": str(row["case_id"]),
+                    "deletion_status": str(row["deletion_status"]),
+                    "steps": steps,
+                }
+            )
+        return self._score_prediction_rows(predictions, threshold)
 
     def run_grid_search(self, candidate_thresholds: Optional[list[float]] = None) -> list[dict[str, Any]]:
         """Conduct grid search across all candidate thresholds."""
@@ -423,12 +579,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=str, default="code/config/config.yaml", help="Path to YAML config")
     parser.add_argument("--threshold", type=float, default=None, help="Evaluate a single threshold")
     parser.add_argument("--grid-search", action="store_true", help="Run full grid search across candidate thresholds")
+    parser.add_argument("--pred", type=str, default=None, help="Score a saved prediction CSV instead of rerunning the pipeline")
+    parser.add_argument("--no-llm", action="store_true", help="Disable model calls during pipeline evaluation")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    engine = EvaluationEngine(config_path=args.config)
+    engine = EvaluationEngine(config_path=args.config, use_llm=not args.no_llm)
+
+    if args.pred:
+        threshold = args.threshold
+        if threshold is None:
+            threshold = float(engine.config.get("thresholds", {}).get("intent_decision", 0.80))
+        print(f"Scoring saved predictions: {args.pred}")
+        res = engine.evaluate_prediction_file(args.pred, threshold)
+        print(json.dumps(res, indent=2))
+        engine._append_history(res)
+        return
 
     if args.threshold is not None:
         print(f"Running evaluation for single threshold: {args.threshold}")

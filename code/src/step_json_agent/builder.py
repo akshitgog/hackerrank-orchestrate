@@ -190,8 +190,15 @@ class StepJsonBuilder:
                     }
                 )
             elif f.operation == "REPORT_EXPOSED_PII":
-                # Determine treatment: Anonymize vs Redact based on system / category
-                if "analytics" in f.system_id or f.data_category == "ANALYTICS_RECORD":
+                # Derive treatment from the resource-local policy category.
+                # Analytics records are anonymized, while analytics resources
+                # explicitly classified as secondary identifiers still require
+                # deletion (and should normally arrive as REPORT_REMAINING_RECORD).
+                if f.data_category in {
+                    "ANALYTICS_RECORD",
+                    "ANALYTICS_PROFILE",
+                    "PRODUCT_TELEMETRY",
+                }:
                     remediations_list.append(
                         {
                             "phase": "REMEDIATION",
@@ -234,23 +241,21 @@ class StepJsonBuilder:
                         }
                     )
 
-        # C. Add Baseline Verifications (e.g. Account absent, Security record present)
-        user_num = audit_result.user_id.replace("user_", "")
-        primary_account = f"account_{user_num}"
-        # Ensure primary account verification is included
-        if not any(v["system_id"] == "account_service" and v["operation"] == "VERIFY_RECORD_ABSENT" for v in verifications_list):
-            verifications_list.append(
-                {
-                    "phase": "VERIFICATION",
-                    "system_id": "account_service",
-                    "resource_id": primary_account,
-                    "operation": "VERIFY_RECORD_ABSENT",
-                    "state": "ABSENT",
-                    "evidence_id": "",
-                }
-            )
+        # C. Include all verified in-scope compliant resources (with evidence_id="")
+        for v in audit_result.verifications:
+            if not any(step["resource_id"] == v.resource_id for step in verifications_list):
+                verifications_list.append(
+                    {
+                        "phase": "VERIFICATION",
+                        "system_id": v.system_id,
+                        "resource_id": v.resource_id,
+                        "operation": v.operation,
+                        "state": v.state,
+                        "evidence_id": "",
+                    }
+                )
 
-        if security_audit_id:
+        if security_audit_id and not any(step["resource_id"] == security_audit_id for step in verifications_list):
             verifications_list.append(
                 {
                     "phase": "VERIFICATION",

@@ -93,6 +93,10 @@ class RobustLLMClient:
         if model.startswith("accounts/fireworks/"):
             model = f"fireworks_ai/{model}"
 
+        # If Fireworks model but no API key is set, immediately skip network calls
+        if model.startswith("fireworks_ai/") and not os.getenv("FIREWORKS_API_KEY"):
+            return None
+
         delay = initial_backoff
         last_exception = None
 
