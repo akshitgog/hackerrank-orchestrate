@@ -1,0 +1,42 @@
+# AI Deletion Audit Agent Configuration
+
+models:
+  # Primary Reasoning & Multimodal VLM Engine (Uses your Fireworks account)
+  llm_engine:
+    enabled: true # Set to true once FIREWORKS_API_KEY is in code/.env
+
+    model: "accounts/fireworks/models/glm-5p3-flash"
+    temperature: 0.0
+    timeout_seconds: 25
+    retries: 3
+    initial_backoff: 1.0
+
+  # Decision Model (Disabled local placeholder so GLM-5.3-Flash handles requests directly)
+  decision_model:
+    enabled: false
+    provider: "local"
+    endpoint: "http://127.0.0.1:8000/v1/decisions"
+    model: "local-decision-v1"
+    timeout_seconds: 10
+    retries: 3
+    threshold: 0.80
+
+thresholds:
+  intent_decision: 0.65
+  grid_search_candidates: [0.50, 0.60, 0.65, 0.70, 0.80, 0.85, 0.90, 0.95]
+
+paths:
+  dataset_dir: "dataset"
+  evidence_dir: "dataset/evidence"
+  cache_dir: "cache"
+  output_csv: "output.csv"
+  evaluation_history: "code/evaluation/evaluation_history.jsonl"
+
+orchestrator:
+  max_guardrail_retries: 3
+  stop_on_error: false
+  log_level: "INFO"
+
+caching:
+  multimodal_cache_file: "cache/multimodal_cache.json"
+  lazy_loading: true
