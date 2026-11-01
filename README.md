@@ -4,9 +4,18 @@ HackerRank Orchestrate is a monthly 24-hour hackathon where you design, build, a
 
 | Month | Project | What it does | Result |
 |---|---|---|---|
+| October 2026 | [Ghost Data Still Exists: AI Deletion Audit Agent](hackerrank-orchestrate-october26) | Audits platform databases, replicas, backups, logs, and multimodal artifacts against deletion policies to discover ghost data and generate verified remediation plans. | Ready for Submission |
 | September 2026 | [Buy or Wait? AI Financial Decision Agent](hackerrank-orchestrate-september) | Evaluates whether a user can safely afford a requested purchase by simulating a 90-day cash flow ledger across bank transactions, salary events, and bill receipts. | 203rd of 3,062 |
 | August 2026 | [WhatsApp Message Notification Router](hackerrank-orchestrate-august) | Routes multimodal WhatsApp messages to notify, digest, or mute using user engagement metrics and deterministic safety gates. | 486th of 1,983 |
 | June 2026 | [Multi-Modal Damage-Claim Verification](hackerrank-orchestrate-june) | Reads a claim, inspects the submitted photos, and decides whether they support the claim, contradict it, or are not enough to tell. Fills in 14 explained columns. | Not submitted |
+
+---
+
+## October 2026: Ghost Data Still Exists: AI Deletion Audit Agent
+
+A deletion workflow may report "Complete" while customer personal data persists across secondary databases, replicas, backups, support attachments, logs, and analytics exports. An active sync process can even resurrect deleted data. The architecture uses a modular multi-agent pipeline: multilingual intent classification (6 languages), temporal identity backtracking, in-memory SQLite Unicode scanning, multimodal perceptual decoupling (PDFs and UI screenshots), and dependency-ordered step serialization validated by deterministic guardrails.
+
+**[Read the October README](hackerrank-orchestrate-october26/README.md)**
 
 ---
 
@@ -38,6 +47,7 @@ Damage claims for cars, laptops, and packages must be verified against photos, c
 
 ```text
 .
+├── hackerrank-orchestrate-october26/   October project: Ghost Data Still Exists AI deletion auditor
 ├── hackerrank-orchestrate-september/   September project: Buy or Wait? financial agent
 ├── hackerrank-orchestrate-august/      August project: WhatsApp notification router
 ├── hackerrank-orchestrate-june/        June project: Multi-modal damage claim verification
